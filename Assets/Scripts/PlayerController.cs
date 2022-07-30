@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
@@ -60,6 +59,16 @@ public class PlayerController : NetworkBehaviour
         }
 
         UpdatePosition();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (IsClient)
+        {
+            FindObjectOfType<CinemachineTargetGroup>().AddMember(transform, 1, 2);
+        }
     }
 
     /// <summary>
