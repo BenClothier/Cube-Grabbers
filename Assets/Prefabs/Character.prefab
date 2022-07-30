@@ -48,9 +48,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 4266255991558908183}
-  speed: 3
-  accelerationSpeed: 5
-  decelerationSpeed: 4
+  speed: 6
+  accelerationSpeed: 10
+  decelerationSpeed: 10
 --- !u!114 &5169678978373274521
 MonoBehaviour:
   m_ObjectHideFlags: 0
