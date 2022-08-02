@@ -35,6 +35,24 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MouseLook"",
+                    ""type"": ""Value"",
+                    ""id"": ""0940bc40-cf5c-4ae5-a00c-40de4d885356"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""GamepadLook"",
+                    ""type"": ""Value"",
+                    ""id"": ""28464874-169b-4a65-822b-d996aedad5b6"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -92,6 +110,28 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f2dfee7c-c148-4c5e-aa6a-b5ec36f765b0"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseLook"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""63a3a4c3-26c7-4068-a1f2-6703997e9da2"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GamepadLook"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -101,6 +141,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         // Default
         m_Default = asset.FindActionMap("Default", throwIfNotFound: true);
         m_Default_Move = m_Default.FindAction("Move", throwIfNotFound: true);
+        m_Default_MouseLook = m_Default.FindAction("MouseLook", throwIfNotFound: true);
+        m_Default_GamepadLook = m_Default.FindAction("GamepadLook", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -161,11 +203,15 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Default;
     private IDefaultActions m_DefaultActionsCallbackInterface;
     private readonly InputAction m_Default_Move;
+    private readonly InputAction m_Default_MouseLook;
+    private readonly InputAction m_Default_GamepadLook;
     public struct DefaultActions
     {
         private @Controls m_Wrapper;
         public DefaultActions(@Controls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Default_Move;
+        public InputAction @MouseLook => m_Wrapper.m_Default_MouseLook;
+        public InputAction @GamepadLook => m_Wrapper.m_Default_GamepadLook;
         public InputActionMap Get() { return m_Wrapper.m_Default; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -178,6 +224,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Move.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
                 @Move.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
                 @Move.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                @MouseLook.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMouseLook;
+                @MouseLook.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMouseLook;
+                @MouseLook.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMouseLook;
+                @GamepadLook.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnGamepadLook;
+                @GamepadLook.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnGamepadLook;
+                @GamepadLook.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnGamepadLook;
             }
             m_Wrapper.m_DefaultActionsCallbackInterface = instance;
             if (instance != null)
@@ -185,6 +237,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
+                @MouseLook.started += instance.OnMouseLook;
+                @MouseLook.performed += instance.OnMouseLook;
+                @MouseLook.canceled += instance.OnMouseLook;
+                @GamepadLook.started += instance.OnGamepadLook;
+                @GamepadLook.performed += instance.OnGamepadLook;
+                @GamepadLook.canceled += instance.OnGamepadLook;
             }
         }
     }
@@ -192,5 +250,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     public interface IDefaultActions
     {
         void OnMove(InputAction.CallbackContext context);
+        void OnMouseLook(InputAction.CallbackContext context);
+        void OnGamepadLook(InputAction.CallbackContext context);
     }
 }

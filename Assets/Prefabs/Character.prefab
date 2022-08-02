@@ -51,6 +51,7 @@ MonoBehaviour:
   speed: 10
   accelerationSpeed: 15
   decelerationSpeed: 15
+  lookSpeed: 10
 --- !u!114 &5169678978373274521
 MonoBehaviour:
   m_ObjectHideFlags: 0

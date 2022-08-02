@@ -948,6 +948,11 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 2021644715}
+    - target: {fileID: 774629575052497818, guid: 78fc9e832e221064b8fbc17c1cd7b55f,
+        type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 774629575052497819, guid: 78fc9e832e221064b8fbc17c1cd7b55f,
         type: 3}
       propertyPath: m_Pivot.x
