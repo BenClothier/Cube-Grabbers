@@ -925,9 +925,9 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1659334025}
   m_PrefabAsset: {fileID: 0}
---- !u!20 &2021644715 stripped
+--- !u!20 &1897147536 stripped
 Camera:
-  m_CorrespondingSourceObject: {fileID: 4887777157166096850, guid: 72fd1020d1b316f40bc41c8d29b7e07d,
+  m_CorrespondingSourceObject: {fileID: 4887777157190912699, guid: 72fd1020d1b316f40bc41c8d29b7e07d,
     type: 3}
   m_PrefabInstance: {fileID: 4887777158914160761}
   m_PrefabAsset: {fileID: 0}
@@ -947,12 +947,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Camera
       value: 
-      objectReference: {fileID: 2021644715}
-    - target: {fileID: 774629575052497818, guid: 78fc9e832e221064b8fbc17c1cd7b55f,
-        type: 3}
-      propertyPath: m_AdditionalShaderChannelsFlag
-      value: 25
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1897147536}
     - target: {fileID: 774629575052497819, guid: 78fc9e832e221064b8fbc17c1cd7b55f,
         type: 3}
       propertyPath: m_Pivot.x
