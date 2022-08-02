@@ -297,6 +297,12 @@ MonoBehaviour:
       SourcePrefabToOverride: {fileID: 0}
       SourceHashToOverride: 0
       OverridingTargetPrefab: {fileID: 0}
+    - Override: 0
+      Prefab: {fileID: 9187698346499238758, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
+        type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
@@ -673,7 +679,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 63aaa9370530cdd4794b3df95399c006, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1061,6 +1067,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: CentrePiece
       objectReference: {fileID: 0}
+    - target: {fileID: 1049335975571011546, guid: a0a69d8e34e2d9245afac08ebe308efe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1879906544672928636, guid: a0a69d8e34e2d9245afac08ebe308efe,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -1280,6 +1291,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1421416522}
     m_Modifications:
+    - target: {fileID: 834835931291750559, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
+        type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3400958669
+      objectReference: {fileID: 0}
     - target: {fileID: 9187698346499238758, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
         type: 3}
       propertyPath: m_Name
@@ -1298,7 +1314,7 @@ PrefabInstance:
     - target: {fileID: 9187698346499238759, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.4823318
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9187698346499238759, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
         type: 3}
