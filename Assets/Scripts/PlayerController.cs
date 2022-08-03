@@ -60,7 +60,16 @@ public class PlayerController : NetworkBehaviour
         {
             FindObjectOfType<CinemachineTargetGroup>().AddMember(transform, 1, 2);
         }
+    }
 
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+
+        if (IsClient)
+        {
+            FindObjectOfType<CinemachineTargetGroup>().RemoveMember(transform);
+        }
     }
 
     private void Awake()
