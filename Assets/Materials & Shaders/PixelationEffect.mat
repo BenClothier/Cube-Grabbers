@@ -57,9 +57,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _AspectRatio: 1.7777778
-    - _PixelHeight: 243
+    - _PixelHeight: 240
     - _PixelWidth: 426
     - _Pixels: 240
+    - _PixelsPerUnit: 19
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors: []

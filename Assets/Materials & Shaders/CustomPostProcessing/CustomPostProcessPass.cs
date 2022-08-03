@@ -86,8 +86,7 @@ public class CustomPostProcessPass : ScriptableRenderPass
         {
             var material = materials.customEffect;
             // P.s. optimize by caching the property ID somewhere else
-            material.SetFloat(Shader.PropertyToID("_PixelHeight"), customEffect.pixelHeight.value);
-            material.SetFloat(Shader.PropertyToID("_AspectRatio"), customEffect.aspectRatio.value);
+            material.SetFloat(Shader.PropertyToID("_PixelsPerUnit"), customEffect.pixelsPerUnit.value);
 
             BlitTo(material);
         }

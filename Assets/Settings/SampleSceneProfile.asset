@@ -114,12 +114,9 @@ MonoBehaviour:
   m_Name: PixelationEffect
   m_EditorClassIdentifier: 
   active: 1
-  pixelHeight:
+  pixelsPerUnit:
     m_OverrideState: 1
-    m_Value: 243
-  aspectRatio:
-    m_OverrideState: 1
-    m_Value: 1.7777778
+    m_Value: 19
 --- !u!114 &3129536948176610976
 MonoBehaviour:
   m_ObjectHideFlags: 3
