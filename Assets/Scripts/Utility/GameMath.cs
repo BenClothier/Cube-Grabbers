@@ -1,4 +1,4 @@
-namespace GameCore.Utility.Math
+namespace Game.Utility.Math
 {
     using System;
     using UnityEngine;

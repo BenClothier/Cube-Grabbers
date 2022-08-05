@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace GameCore.Utility.Networking
+namespace Game.Utility.Networking
 {
     public class NetworkSingleton<T> : NetworkBehaviour
         where T : Component

@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
 
-namespace GameCore.Utility.Networking
+namespace Game.Utility.Networking
 {
     public static class NetworkingTools
     {

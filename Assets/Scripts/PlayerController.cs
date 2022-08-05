@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
-using GameCore.Utility.Math;
+using Game.Utility.Math;
 using Cinemachine;
 
 [RequireComponent(typeof(Collider))]
@@ -256,8 +256,7 @@ public class PlayerController : NetworkBehaviour
     private Vector3 CalculateMouseWorldPos(Vector2 mousePos)
     {
         Ray pointerRay = Camera.main.ScreenPointToRay(mousePos);
-        Vector3 mouseWorldPos = GameMath.CalcPointOfPlaneIntersect(transform.position, Vector3.up, pointerRay.origin, pointerRay.direction);
-        return mouseWorldPos;
+        return GameMath.CalcPointOfPlaneIntersect(transform.position, Vector3.up, pointerRay.origin, pointerRay.direction);
     }
 
     #endregion
