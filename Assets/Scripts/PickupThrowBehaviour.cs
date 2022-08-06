@@ -61,21 +61,67 @@ public class PickupThrowBehaviour : NetworkBehaviour
 
     #region Throw Behaviour
 
-    Vector3? position;
+    [SerializeField] Transform projectilePrefab;
+    Vector3 throwOrigin = new Vector3(0, 0, -10);
+    Vector3 throwTarget = new Vector3(0, 0, 0);
+    private bool thrown = false;
 
-    private void Update()
-    { 
+    private float throwSpeed;
+    private float maxRange;
+
+    public float ThrowSpeed
+    {
+        get
+        {
+            return throwSpeed;
+        }
+
+        set
+        {
+            throwSpeed = value;
+            maxRange = Ballistics.CalculateMaxRange(value);
+        }
+    }
+
+    private void Start()
+    {
+        ThrowSpeed = 12;
+    }
+
+    private void FixedUpdate()
+    {
         if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
         {
-            position = mouseWorldHitInfo.point;
-            Vector3 displacementVector = mouseWorldHitInfo.point - transform.position;
-            Debug.DrawLine(transform.position, mouseWorldHitInfo.point, Color.red);
-            Debug.DrawRay(transform.position, CalculateThrowDir(displacementVector, 6), Color.blue);
+            throwOrigin = transform.position;
+            throwTarget = mouseWorldHitInfo.point;
+            GenerateTrajectoryPath(throwOrigin, throwTarget, out Quaternion launchDir);
+
+            if (!thrown && Mouse.current.leftButton.isPressed)
+            {
+                Transform projectile = Instantiate(projectilePrefab, throwOrigin, launchDir);
+                Debug.Log(launchDir);
+                projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * throwSpeed;
+                thrown = true;
+            }
+            else if (thrown && Mouse.current.rightButton.isPressed)
+            {
+                thrown = false;
+            }
         }
-        else
+    }
+
+    private void GenerateTrajectoryPath(Vector3 launchOrigin, Vector3 launchTarget, out Quaternion launchDir)
+    {
+        Ballistics.CalculateTrajectory(launchOrigin, launchTarget, throwSpeed, out float angle);
+        launchDir = TrajectoryToLookDir(launchOrigin, launchTarget, angle);
+
+        Transform GO = Instantiate(new GameObject("Name"), Vector3.zero, launchDir).transform;
+
+        if (Ballistics.GetHit(launchOrigin, GO.forward, throwSpeed, out RaycastHit? hitInfo))
         {
-            position = null;
+            Debug.DrawRay(hitInfo.Value.point, hitInfo.Value.normal, Color.red);
         }
+
     }
 
     /// <summary>
@@ -94,42 +140,11 @@ public class PickupThrowBehaviour : NetworkBehaviour
         return false;
     }
 
-    private Vector3 CalculateThrowDir2(Vector3 displacementVector, float throwSpeed)
+    public Quaternion TrajectoryToLookDir(Vector3 start, Vector3 end, float angle)
     {
-        Vector3 hrzDisp = new Vector3(displacementVector.x, 0, displacementVector.z);
-        Vector3 vrtDisp = new Vector3(0, -displacementVector.y, 0);
-        float angleOfThrow = Mathf.Rad2Deg * Mathf.Asin((displacementVector.magnitude * -Physics.gravity.y) / Mathf.Pow(throwSpeed, 2)) / 2;
-        return Vector3.Lerp(Vector3.up, displacementVector.normalized, angleOfThrow / 90);
-    }
-
-    private Vector3 CalculateThrowDir(Vector3 displacementVector, float throwSpeed)
-    {
-        float hrzDisp = new Vector3(displacementVector.x, 0, displacementVector.z).magnitude;
-        float vrtDisp = -displacementVector.y;
-
-        float a = (-Physics.gravity.y * Mathf.Pow(hrzDisp, 2)) / Mathf.Pow(throwSpeed, 2);
-        float b = (a - vrtDisp) / Mathf.Sqrt(Mathf.Pow(hrzDisp, 2) + Mathf.Pow(vrtDisp, 2));
-        float angleOfThrow = Mathf.Rad2Deg * 0.5f * (Mathf.Acos(b) + Mathf.Atan(hrzDisp / vrtDisp));
-
-        Debug.Log($"H: {vrtDisp}, R: {hrzDisp}, A: {angleOfThrow}");
-
-        if (angleOfThrow >= 0)
-        {
-            return Vector3.Lerp(Vector3.up, displacementVector.normalized, (90 - angleOfThrow) / 90);
-        }
-        else
-        {
-            return Vector3.Lerp(Vector3.up, displacementVector.normalized, (-angleOfThrow) / 90);
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (position.HasValue)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawSphere(position.Value, 0.1f);
-        }
+        Vector3 wantedRotationVector = Quaternion.LookRotation(end - start).eulerAngles;
+        wantedRotationVector.x = angle;
+        return Quaternion.Euler(wantedRotationVector);
     }
 
     #endregion
