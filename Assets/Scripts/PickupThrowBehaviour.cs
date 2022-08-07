@@ -117,11 +117,22 @@ public class PickupThrowBehaviour : NetworkBehaviour
 
         Transform GO = Instantiate(new GameObject("Name"), Vector3.zero, launchDir).transform;
 
-        if (Ballistics.GetHit(launchOrigin, GO.forward, throwSpeed, out RaycastHit? hitInfo))
+        Ballistics.LaunchPathInfo pathInfo = Ballistics.GenerateLaunchPathInfo(launchOrigin, GO.forward, throwSpeed);
+
+        Debug.DrawRay(pathInfo.highestPoint, Vector3.down, Color.red);
+
+        if (pathInfo.launchPath.Length > 0)
         {
-            Debug.DrawRay(hitInfo.Value.point, hitInfo.Value.normal, Color.red);
+            foreach (var point in pathInfo.launchPath)
+            {
+                Debug.DrawRay(point, Vector3.down * .25f, Color.blue);
+            }
         }
 
+        if (pathInfo.hit.HasValue)
+        {
+            Debug.DrawRay(pathInfo.hit.Value.point, pathInfo.hit.Value.normal, Color.red);
+        }
     }
 
     /// <summary>

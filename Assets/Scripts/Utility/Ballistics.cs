@@ -1,5 +1,7 @@
 namespace Game.Utility.Math
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     public static class Ballistics
@@ -51,7 +53,7 @@ namespace Game.Utility.Math
         /// <param name="timeResolution">Time from frame to frame.</param>
         /// <param name="maxTime">Max time to simulate, will be clamped to reach height 0 (aprox.).</param>
 
-        public static Vector3[] GetBallisticPath(Vector3 startPos, Vector3 forward, float launchSpeed, float timeResolution, float maxTime = 5f)
+        public static Vector3[] GetBallisticPath(Vector3 startPos, Vector3 forward, float launchSpeed, float timeResolution, float maxTime = 8)
         {
 
             //maxTime = Mathf.Min(maxTime, GetTimeOfFlight(launchSpeed, Vector3.Angle(forward, Vector3.up) * Mathf.Deg2Rad, startPos.y));
@@ -74,61 +76,67 @@ namespace Game.Utility.Math
         }
 
         /// <summary>
-        /// Checks the ballistic path for collisions.
+        /// Checks the ballistics path for collisions.
         /// </summary>
-        /// <returns><c>false</c>, if ballistic path was blocked by an object on the Layermask, <c>true</c> otherwise.</returns>
-        /// <param name="arc">Arc.</param>
-        /// <param name="lm">Anything in this layer will block the path.</param>
-        public static bool CheckBallisticPath(Vector3[] arc, LayerMask lm)
+        /// <param name="arc">The path.</param>
+        /// <returns>The hit information, if there was a hit.</returns>
+        public static LaunchPathInfo CheckBallisticPath(Vector3[] arc, LaunchPathInfo pathInfo)
         {
-
-            RaycastHit hit;
-            for (int i = 1; i < arc.Length; i++)
+            Vector3 maxY = new Vector3(0, float.MinValue, 0);
+            int i;
+            for (i = 1; i < arc.Length; i++)
             {
+                Vector3 rayOrigin = arc[i - 1];
+                Vector3 rayDir = arc[i] - arc[i - 1];
+                maxY = (rayOrigin.y > maxY.y) ? rayOrigin : maxY;
 
-                //if (Physics.Raycast(arc[i - 1], arc[i] - arc[i - 1], out hit, (arc[i] - arc[i - 1]).magnitude) && (lm == (lm | (1 << hit.transform.gameObject.layer))))
-                //    return false;
-
-                if (Physics.Raycast(arc[i - 1], arc[i] - arc[i - 1], out hit, (arc[i] - arc[i - 1]).magnitude) && (lm == (lm | (1 << hit.transform.gameObject.layer))))
+                if (Physics.Raycast(rayOrigin, rayDir, out RaycastHit hit, (arc[i] - arc[i - 1]).magnitude, LayerMask.GetMask("Default")))
                 {
-                    Debug.DrawRay(arc[i - 1], arc[i] - arc[i - 1], Color.red, 10f);
-                    return false;
-                }
-                else
-                {
-                    Debug.DrawRay(arc[i - 1], arc[i] - arc[i - 1], Color.green, 10f);
-                }
-            }
-            return true;
-        }
-
-        public static bool GetHit(Vector3 startPos, Vector3 forward, float launchSpeed, out RaycastHit? hitInfo)
-        {
-            Vector3[] path = GetBallisticPath(startPos, forward, launchSpeed, 0.2f);
-            for (int i = 1; i < path.Length; i++)
-            {
-                Debug.DrawRay (path [i - 1], path [i] - path [i - 1], Color.blue);
-                if (Physics.Raycast(path[i - 1], path[i] - path[i - 1], out RaycastHit hit, (path[i] - path[i - 1]).magnitude))
-                {
-                    hitInfo = hit;
-                    return true;
+                    pathInfo.hit = hit;
+                    break;
                 }
             }
 
-            hitInfo = null;
-            return false;
+            pathInfo.highestPoint = maxY;
+            pathInfo.launchPath = ThinOutPath(arc.Take(i).ToArray());
+            return pathInfo;
         }
 
+        public static LaunchPathInfo GenerateLaunchPathInfo(Vector3 startPos, Vector3 forward, float launchSpeed)
+        {
+            Vector3[] path = GetBallisticPath(startPos, forward, launchSpeed, 0.002f, 8);
+
+            LaunchPathInfo launchPathInfo = default;
+            launchPathInfo = CheckBallisticPath(path, launchPathInfo);
+
+            return launchPathInfo;
+        }
 
         public static float CalculateMaxRange(float launchSpeed)
         {
             return (launchSpeed * launchSpeed) / -Physics.gravity.y;
         }
 
-        public static float GetTimeOfFlight(float vel, float angle, float height)
+        public static Vector3 CalculateHighestPoint(Vector3 launchOrigin, Vector3 launchTrajectory, float launchSpeed)
         {
-            return (2.0f * vel * Mathf.Sin(angle)) / -Physics.gravity.y;
+            Vector3 hrz = new (launchTrajectory.x * launchSpeed, 0, launchTrajectory.z * launchSpeed);
+            float v_y = launchTrajectory.y * launchSpeed;
+
+            return launchOrigin + (hrz * (v_y / -Physics.gravity.y)) + (Vector3.up * (v_y * v_y) / (-Physics.gravity.y * 2));
         }
 
+        public static Vector3[] ThinOutPath(Vector3[] path, int thinFactor = 15)
+        {
+            var last = path.Length - 1;
+            return path.Where((item, i) => i % thinFactor == 0 || i == last)
+                           .ToArray();
+        }
+
+        public struct LaunchPathInfo
+        {
+            public RaycastHit? hit;
+            public Vector3 highestPoint;
+            public Vector3[] launchPath;
+        }
     }
 }
