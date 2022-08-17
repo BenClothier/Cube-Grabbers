@@ -68,7 +68,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectHoldingPos: {fileID: 1263291301082946074}
-  projectilePrefab: {fileID: 5223858754034436147, guid: 52ebf5665b651184a80f06dc32c4a5a7,
+  projectilePrefab: {fileID: 9187698346499238759, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
     type: 3}
 --- !u!54 &4924653361221388928
 Rigidbody:
@@ -142,7 +142,7 @@ Transform:
   m_GameObject: {fileID: 4266255991558908183}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3158402661599004541}
