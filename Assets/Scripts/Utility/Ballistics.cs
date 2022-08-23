@@ -1,6 +1,5 @@
 namespace Game.Utility.Math
 {
-    using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
 
@@ -55,17 +54,16 @@ namespace Game.Utility.Math
 
         public static Vector3[] GetBallisticPath(Vector3 startPos, Vector3 forward, float launchSpeed, float timeResolution, float maxTime = 8)
         {
-
-            //maxTime = Mathf.Min(maxTime, GetTimeOfFlight(launchSpeed, Vector3.Angle(forward, Vector3.up) * Mathf.Deg2Rad, startPos.y));
             Vector3[] positions = new Vector3[Mathf.CeilToInt(maxTime / timeResolution)];
             Vector3 velVector = forward * launchSpeed;
             int index = 0;
             Vector3 curPosition = startPos;
+
             for (float t = 0.0f; t < maxTime; t += timeResolution)
             {
 
                 if (index >= positions.Length)
-                    break;//rounding error using certain values for maxTime and timeResolution
+                    break; //rounding error using certain values for maxTime and timeResolution
 
                 positions[index] = curPosition;
                 curPosition += velVector * timeResolution;
@@ -84,6 +82,7 @@ namespace Game.Utility.Math
         {
             Vector3 maxY = new Vector3(0, float.MinValue, 0);
             int i;
+
             for (i = 1; i < arc.Length; i++)
             {
                 Vector3 rayOrigin = arc[i - 1];
@@ -110,11 +109,6 @@ namespace Game.Utility.Math
             launchPathInfo = CheckBallisticPath(path, launchPathInfo);
 
             return launchPathInfo;
-        }
-
-        public static float CalculateMaxRange(float launchSpeed)
-        {
-            return (launchSpeed * launchSpeed) / -Physics.gravity.y;
         }
 
         public static Vector3 CalculateHighestPoint(Vector3 launchOrigin, Vector3 launchTrajectory, float launchSpeed)
