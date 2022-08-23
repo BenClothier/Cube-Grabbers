@@ -97,7 +97,7 @@ namespace Character
         {
             if (IsInState(State.Aiming) && CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
             {
-                launchPathInfo = GenerateTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed);
+                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed, 0.002f, 8);
 
                 Debug.DrawRay(launchPathInfo.Value.highestPoint, Vector3.down, Color.red);
 
@@ -199,18 +199,6 @@ namespace Character
             }
         }
 
-        private static Ballistics.LaunchPathInfo GenerateTrajectoryPath(Vector3 launchOrigin, Vector3 launchTarget, float throwSpeed)
-        {
-            Ballistics.CalculateTrajectory(launchOrigin, launchTarget, throwSpeed, out float angle);
-            Quaternion launchDir = TrajectoryToLookDir(launchOrigin, launchTarget, angle);
-
-            Transform GO = Instantiate(new GameObject("Name"), Vector3.zero, launchDir).transform; // THIS IS DUMB
-            Ballistics.LaunchPathInfo pathInfo = Ballistics.GenerateLaunchPathInfo(launchOrigin, launchDir, GO.forward, throwSpeed);
-            Destroy(GO.gameObject);
-
-            return pathInfo;
-        }
-
         private static bool CalculateMouseWorldIntersect(Vector2 mousePos, out RaycastHit hitInfo)
         {
             Ray pointerRay = Camera.main.ScreenPointToRay(mousePos);
@@ -220,13 +208,6 @@ namespace Character
             }
 
             return false;
-        }
-
-        public static Quaternion TrajectoryToLookDir(Vector3 start, Vector3 end, float angle)
-        {
-            Vector3 wantedRotationVector = Quaternion.LookRotation(end - start).eulerAngles;
-            wantedRotationVector.x = angle;
-            return Quaternion.Euler(wantedRotationVector);
         }
 
         #endregion
