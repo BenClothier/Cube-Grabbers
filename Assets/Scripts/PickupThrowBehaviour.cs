@@ -123,7 +123,7 @@ namespace Character
         [ServerRpc]
         private void RequestThrowServerRpc(Quaternion launchDir)
         {
-            Transform projectile = Instantiate(projectilePrefab, transform.position, launchDir);
+            Transform projectile = Instantiate(projectilePrefab, HoldingPosition, launchDir);
             projectile.GetComponent<NetworkObject>().Spawn();
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * ThrowSpeed;
             GrantThrowClientRpc();
@@ -178,7 +178,7 @@ namespace Character
         {
             if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
             {
-                GenerateTrajectoryPath(transform.position, mouseWorldHitInfo.point, ThrowSpeed, out Quaternion launchDir);
+                GenerateTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed, out Quaternion launchDir);
                 return launchDir;
             }
 
