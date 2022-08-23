@@ -37,7 +37,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""MouseLook"",
+                    ""name"": ""Look"",
                     ""type"": ""Value"",
                     ""id"": ""0940bc40-cf5c-4ae5-a00c-40de4d885356"",
                     ""expectedControlType"": ""Vector2"",
@@ -46,13 +46,22 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""GamepadLook"",
-                    ""type"": ""Value"",
-                    ""id"": ""28464874-169b-4a65-822b-d996aedad5b6"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""name"": ""Aim/Throw"",
+                    ""type"": ""Button"",
+                    ""id"": ""2611962c-ed34-4523-9f9d-f4425a60e770"",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""CancelThrow"",
+                    ""type"": ""Button"",
+                    ""id"": ""d7e86670-b64a-4a1b-bf1b-0759a043cdbb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -118,7 +127,29 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MouseLook"",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""46fbd93b-184d-4587-9799-d98f2b23fbfc"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Aim/Throw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c98876ad-412d-44fb-aab1-0b4ebc84ee94"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CancelThrow"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -129,7 +160,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""GamepadLook"",
+                    ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -141,8 +172,9 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         // Default
         m_Default = asset.FindActionMap("Default", throwIfNotFound: true);
         m_Default_Move = m_Default.FindAction("Move", throwIfNotFound: true);
-        m_Default_MouseLook = m_Default.FindAction("MouseLook", throwIfNotFound: true);
-        m_Default_GamepadLook = m_Default.FindAction("GamepadLook", throwIfNotFound: true);
+        m_Default_Look = m_Default.FindAction("Look", throwIfNotFound: true);
+        m_Default_AimThrow = m_Default.FindAction("Aim/Throw", throwIfNotFound: true);
+        m_Default_CancelThrow = m_Default.FindAction("CancelThrow", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -203,15 +235,17 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Default;
     private IDefaultActions m_DefaultActionsCallbackInterface;
     private readonly InputAction m_Default_Move;
-    private readonly InputAction m_Default_MouseLook;
-    private readonly InputAction m_Default_GamepadLook;
+    private readonly InputAction m_Default_Look;
+    private readonly InputAction m_Default_AimThrow;
+    private readonly InputAction m_Default_CancelThrow;
     public struct DefaultActions
     {
         private @Controls m_Wrapper;
         public DefaultActions(@Controls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Default_Move;
-        public InputAction @MouseLook => m_Wrapper.m_Default_MouseLook;
-        public InputAction @GamepadLook => m_Wrapper.m_Default_GamepadLook;
+        public InputAction @Look => m_Wrapper.m_Default_Look;
+        public InputAction @AimThrow => m_Wrapper.m_Default_AimThrow;
+        public InputAction @CancelThrow => m_Wrapper.m_Default_CancelThrow;
         public InputActionMap Get() { return m_Wrapper.m_Default; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -224,12 +258,15 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Move.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
                 @Move.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
                 @Move.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
-                @MouseLook.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMouseLook;
-                @MouseLook.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMouseLook;
-                @MouseLook.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMouseLook;
-                @GamepadLook.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnGamepadLook;
-                @GamepadLook.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnGamepadLook;
-                @GamepadLook.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnGamepadLook;
+                @Look.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnLook;
+                @Look.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnLook;
+                @Look.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnLook;
+                @AimThrow.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnAimThrow;
+                @AimThrow.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnAimThrow;
+                @AimThrow.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnAimThrow;
+                @CancelThrow.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnCancelThrow;
+                @CancelThrow.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnCancelThrow;
+                @CancelThrow.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnCancelThrow;
             }
             m_Wrapper.m_DefaultActionsCallbackInterface = instance;
             if (instance != null)
@@ -237,12 +274,15 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
-                @MouseLook.started += instance.OnMouseLook;
-                @MouseLook.performed += instance.OnMouseLook;
-                @MouseLook.canceled += instance.OnMouseLook;
-                @GamepadLook.started += instance.OnGamepadLook;
-                @GamepadLook.performed += instance.OnGamepadLook;
-                @GamepadLook.canceled += instance.OnGamepadLook;
+                @Look.started += instance.OnLook;
+                @Look.performed += instance.OnLook;
+                @Look.canceled += instance.OnLook;
+                @AimThrow.started += instance.OnAimThrow;
+                @AimThrow.performed += instance.OnAimThrow;
+                @AimThrow.canceled += instance.OnAimThrow;
+                @CancelThrow.started += instance.OnCancelThrow;
+                @CancelThrow.performed += instance.OnCancelThrow;
+                @CancelThrow.canceled += instance.OnCancelThrow;
             }
         }
     }
@@ -250,7 +290,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     public interface IDefaultActions
     {
         void OnMove(InputAction.CallbackContext context);
-        void OnMouseLook(InputAction.CallbackContext context);
-        void OnGamepadLook(InputAction.CallbackContext context);
+        void OnLook(InputAction.CallbackContext context);
+        void OnAimThrow(InputAction.CallbackContext context);
+        void OnCancelThrow(InputAction.CallbackContext context);
     }
 }

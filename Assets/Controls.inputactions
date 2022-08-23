@@ -15,7 +15,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "MouseLook",
+                    "name": "Look",
                     "type": "Value",
                     "id": "0940bc40-cf5c-4ae5-a00c-40de4d885356",
                     "expectedControlType": "Vector2",
@@ -24,13 +24,22 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "GamepadLook",
-                    "type": "Value",
-                    "id": "28464874-169b-4a65-822b-d996aedad5b6",
-                    "expectedControlType": "Vector2",
+                    "name": "Aim/Throw",
+                    "type": "Button",
+                    "id": "2611962c-ed34-4523-9f9d-f4425a60e770",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "CancelThrow",
+                    "type": "Button",
+                    "id": "d7e86670-b64a-4a1b-bf1b-0759a043cdbb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -96,7 +105,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MouseLook",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "46fbd93b-184d-4587-9799-d98f2b23fbfc",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Aim/Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c98876ad-412d-44fb-aab1-0b4ebc84ee94",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CancelThrow",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -107,7 +138,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "GamepadLook",
+                    "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

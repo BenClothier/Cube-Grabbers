@@ -23,10 +23,15 @@ namespace Character
         {
             if (NetworkManager.SpawnManager.SpawnedObjects[pickupNetObjID].gameObject.TryGetComponent(out Pickupable pickupable))
             {
-                heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos);
+                SpawnHoldable(pickupable);
+
                 GrantPickupClientRpc(pickupNetObjID);
-                pickupable.gameObject.SetActive(false);
                 NetworkingTools.DespawnAfterSeconds(pickupable.NetworkObject, 2);
+
+                if (IsOwner)
+                {
+                    MoveState(Command.Pickup);
+                }
             }
             else
             {
@@ -41,8 +46,7 @@ namespace Character
             {
                 if (NetworkManager.SpawnManager.SpawnedObjects[pickupNetObjID].gameObject.TryGetComponent(out Pickupable pickupable))
                 {
-                    heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos);
-                    pickupable.gameObject.SetActive(false);
+                    SpawnHoldable(pickupable);
 
                     if (IsOwner)
                     {
@@ -54,6 +58,12 @@ namespace Character
                     Debug.LogError("Something went wrong when trying to find the pickupable's network object.");
                 }
             }
+        }
+
+        private void SpawnHoldable(Pickupable pickupable)
+        {
+            heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos);
+            pickupable.gameObject.SetActive(false);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -71,29 +81,35 @@ namespace Character
 
         [SerializeField] Transform projectilePrefab;
 
+        private Controls controls;
+
         public float ThrowSpeed { get; set; } = 12;
 
-        private void FixedUpdate()
+        public override void OnNetworkSpawn()
         {
+            base.OnNetworkSpawn();
+
             if (IsOwner)
             {
-                if (Mouse.current.leftButton.wasPressedThisFrame && IsInState(State.Holding))
-                {
-                    MoveState(Command.Aim);
-                }
-                else if (IsInState(State.Aiming))
-                {
-                    Quaternion? launchDir = CalcAndDrawTrajectory();
+                controls = new Controls();
 
-                    if (Mouse.current.rightButton.wasPressedThisFrame || (Mouse.current.leftButton.wasReleasedThisFrame && !launchDir.HasValue))
-                    {
-                        MoveState(Command.CancelAim);
-                    }
-                    else if (Mouse.current.leftButton.wasReleasedThisFrame)
-                    {
-                        RequestThrowServerRpc(launchDir.Value);
-                    }
-                }
+                controls.Default.AimThrow.performed += Aim;
+                controls.Default.AimThrow.canceled += Throw;
+                controls.Default.CancelThrow.performed += CancelAim;
+
+                controls.Default.AimThrow.Enable();
+                controls.Default.CancelThrow.Enable();
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            if (IsOwner && controls is not null)
+            {
+                controls.Default.AimThrow.Disable();
+                controls.Default.CancelThrow.Disable();
             }
         }
 
@@ -118,6 +134,36 @@ namespace Character
             }
         }
 
+        private void Aim(InputAction.CallbackContext context)
+        {
+            if (IsInState(State.Holding))
+            {
+                MoveState(Command.Aim);
+            }
+        }
+
+        private void Throw(InputAction.CallbackContext context)
+        {
+            if (IsInState(State.Aiming))
+            {
+                Quaternion? launchDir = CalcAndDrawTrajectory();
+
+                if (launchDir.HasValue)
+                {
+                    RequestThrowServerRpc(launchDir.Value);
+                }
+                else
+                {
+                    MoveState(Command.CancelAim);
+                }
+            }
+        }
+
+        private void CancelAim(InputAction.CallbackContext context)
+        {
+            MoveState(Command.CancelAim);
+        }
+
         private Quaternion? CalcAndDrawTrajectory()
         {
             if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
@@ -136,7 +182,7 @@ namespace Character
 
             Transform GO = Instantiate(new GameObject("Name"), Vector3.zero, launchDir).transform; // THIS IS DUMB
             Ballistics.LaunchPathInfo pathInfo = Ballistics.GenerateLaunchPathInfo(launchOrigin, GO.forward, throwSpeed);
-            Destroy(GO);
+            Destroy(GO.gameObject);
 
             Debug.DrawRay(pathInfo.highestPoint, Vector3.down, Color.red);
 
@@ -201,6 +247,7 @@ namespace Character
         public State MoveState(Command command)
         {
             CurrentState = GetState(command);
+            Debug.Log($"New State: {CurrentState}");
             return CurrentState;
         }
 

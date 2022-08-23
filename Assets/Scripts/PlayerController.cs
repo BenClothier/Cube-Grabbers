@@ -45,8 +45,7 @@ public class PlayerController : NetworkBehaviour
     // client input
     private Controls controls;
     private InputAction movement;
-    private InputAction gamepadLook;
-    private InputAction mouseLook;
+    private InputAction look;
 
     // client input caching
     private Vector2 prevMousePos;
@@ -81,18 +80,15 @@ public class PlayerController : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody>();
         movement = controls.Default.Move;
-        gamepadLook = controls.Default.GamepadLook;
-        mouseLook = controls.Default.MouseLook;
+        look = controls.Default.Look;
         movement.Enable();
-        gamepadLook.Enable();
-        mouseLook.Enable();
+        look.Enable();
     }
 
     private void OnDisable()
     {
         movement.Disable();
-        gamepadLook.Disable();
-        mouseLook.Disable();
+        look.Disable();
     }
 
     private void FixedUpdate()
@@ -217,7 +213,7 @@ public class PlayerController : NetworkBehaviour
     /// <returns>desired look-rotation of the character.</returns>
     private Quaternion GamepadLook()
     {
-        Vector2 stickPos = gamepadLook.ReadValue<Vector2>();
+        Vector2 stickPos = look.ReadValue<Vector2>();
 
         if (stickPos == Vector2.zero)
         {
@@ -234,7 +230,7 @@ public class PlayerController : NetworkBehaviour
     /// <returns>desired look-rotation of the character.</returns>
     private Quaternion MouseLook()
     {
-        Vector2 mousePos = mouseLook.ReadValue<Vector2>();
+        Vector2 mousePos = look.ReadValue<Vector2>();
 
         if (mousePos == prevMousePos)
         {
