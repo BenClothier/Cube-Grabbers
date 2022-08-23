@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 9187698346499238759}
   - component: {fileID: 1800823237}
   - component: {fileID: 3786379951136843674}
-  - component: {fileID: 3390383596622733458}
   - component: {fileID: 8581954076396865700}
   - component: {fileID: 5497655908176815152}
   - component: {fileID: 129918932431353260}
@@ -53,6 +52,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   holdablePrefab: {fileID: 7226550322120026300, guid: 833908f64af6f7b4fa89cf10bd7b2feb,
     type: 3}
+  timeUntilPickupable: 1
 --- !u!135 &3786379951136843674
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -65,19 +65,6 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.8
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &3390383596622733458
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9187698346499238758}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &8581954076396865700
 Rigidbody:
@@ -161,6 +148,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cube (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 26201596627976018, guid: 1e7ac05ecbcdf7e42b73108e7c516d0b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 26201596627976041, guid: 1e7ac05ecbcdf7e42b73108e7c516d0b,
         type: 3}
       propertyPath: m_RootOrder
@@ -218,6 +210,25 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e7ac05ecbcdf7e42b73108e7c516d0b, type: 3}
+--- !u!1 &9187698347126421195 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 26201596627976018, guid: 1e7ac05ecbcdf7e42b73108e7c516d0b,
+    type: 3}
+  m_PrefabInstance: {fileID: 9213332126679107993}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &5729315037318501580
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9187698347126421195}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &9187698347126421232 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 26201596627976041, guid: 1e7ac05ecbcdf7e42b73108e7c516d0b,

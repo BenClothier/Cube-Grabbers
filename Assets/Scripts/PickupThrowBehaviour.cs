@@ -23,14 +23,17 @@ namespace Character
         {
             if (NetworkManager.SpawnManager.SpawnedObjects[pickupNetObjID].gameObject.TryGetComponent(out Pickupable pickupable))
             {
-                SpawnHoldable(pickupable);
-
-                GrantPickupClientRpc(pickupNetObjID);
-                NetworkingTools.DespawnAfterSeconds(pickupable.NetworkObject, 2);
-
-                if (IsOwner)
+                if (pickupable.IsPickupable)
                 {
-                    MoveState(Command.Pickup);
+                    SpawnHoldable(pickupable);
+
+                    GrantPickupClientRpc(pickupNetObjID);
+                    NetworkingTools.DespawnAfterSeconds(pickupable.NetworkObject, 2);
+
+                    if (IsOwner)
+                    {
+                        MoveState(Command.Pickup);
+                    }
                 }
             }
             else
@@ -71,7 +74,11 @@ namespace Character
             if (IsClient && IsOwner && other.gameObject.CompareTag("Pickupable"))
             {
                 Pickupable pickupable = other.gameObject.GetComponent<Pickupable>();
-                RequestPickupServerRpc(pickupable.NetworkObjectId);
+
+                if (pickupable.IsPickupable)
+                {
+                    RequestPickupServerRpc(pickupable.NetworkObjectId);
+                }
             }
         }
 
@@ -161,7 +168,10 @@ namespace Character
 
         private void CancelAim(InputAction.CallbackContext context)
         {
-            MoveState(Command.CancelAim);
+            if (IsInState(State.Aiming))
+            {
+                MoveState(Command.CancelAim);
+            }
         }
 
         private Quaternion? CalcAndDrawTrajectory()
