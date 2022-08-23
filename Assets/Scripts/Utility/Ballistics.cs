@@ -101,12 +101,13 @@ namespace Game.Utility.Math
             return pathInfo;
         }
 
-        public static LaunchPathInfo GenerateLaunchPathInfo(Vector3 startPos, Vector3 forward, float launchSpeed)
+        public static LaunchPathInfo GenerateLaunchPathInfo(Vector3 startPos, Quaternion launchDir, Vector3 forward, float launchSpeed)
         {
             Vector3[] path = GetBallisticPath(startPos, forward, launchSpeed, 0.002f, 8);
 
             LaunchPathInfo launchPathInfo = default;
             launchPathInfo = CheckBallisticPath(path, launchPathInfo);
+            launchPathInfo.launchDir = launchDir;
 
             return launchPathInfo;
         }
@@ -131,6 +132,7 @@ namespace Game.Utility.Math
             public RaycastHit? hit;
             public Vector3 highestPoint;
             public Vector3[] launchPath;
+            public Quaternion launchDir;
         }
     }
 }

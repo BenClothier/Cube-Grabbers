@@ -89,8 +89,32 @@ namespace Character
         [SerializeField] Transform projectilePrefab;
 
         private Controls controls;
+        private Ballistics.LaunchPathInfo? launchPathInfo = null;
 
         public float ThrowSpeed { get; set; } = 12;
+
+        private void LateUpdate()
+        {
+            if (IsInState(State.Aiming) && CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
+            {
+                launchPathInfo = GenerateTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed);
+
+                Debug.DrawRay(launchPathInfo.Value.highestPoint, Vector3.down, Color.red);
+
+                if (launchPathInfo.Value.launchPath.Length > 0)
+                {
+                    foreach (var point in launchPathInfo.Value.launchPath)
+                    {
+                        Debug.DrawRay(point, Vector3.down * .25f, Color.blue);
+                    }
+                }
+
+                if (launchPathInfo.Value.hit.HasValue)
+                {
+                    Debug.DrawRay(launchPathInfo.Value.hit.Value.point, launchPathInfo.Value.hit.Value.normal, Color.red);
+                }
+            }
+        }
 
         public override void OnNetworkSpawn()
         {
@@ -153,15 +177,15 @@ namespace Character
         {
             if (IsInState(State.Aiming))
             {
-                Quaternion? launchDir = CalcAndDrawTrajectory();
-
-                if (launchDir.HasValue)
+                if (launchPathInfo.HasValue)
                 {
-                    RequestThrowServerRpc(launchDir.Value);
+                    RequestThrowServerRpc(launchPathInfo.Value.launchDir);
+                    launchPathInfo = null;
                 }
                 else
                 {
                     MoveState(Command.CancelAim);
+                    launchPathInfo = null;
                 }
             }
         }
@@ -171,43 +195,20 @@ namespace Character
             if (IsInState(State.Aiming))
             {
                 MoveState(Command.CancelAim);
+                launchPathInfo = null;
             }
         }
 
-        private Quaternion? CalcAndDrawTrajectory()
-        {
-            if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
-            {
-                GenerateTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed, out Quaternion launchDir);
-                return launchDir;
-            }
-
-            return null;
-        }
-
-        private static void GenerateTrajectoryPath(Vector3 launchOrigin, Vector3 launchTarget, float throwSpeed, out Quaternion launchDir)
+        private static Ballistics.LaunchPathInfo GenerateTrajectoryPath(Vector3 launchOrigin, Vector3 launchTarget, float throwSpeed)
         {
             Ballistics.CalculateTrajectory(launchOrigin, launchTarget, throwSpeed, out float angle);
-            launchDir = TrajectoryToLookDir(launchOrigin, launchTarget, angle);
+            Quaternion launchDir = TrajectoryToLookDir(launchOrigin, launchTarget, angle);
 
             Transform GO = Instantiate(new GameObject("Name"), Vector3.zero, launchDir).transform; // THIS IS DUMB
-            Ballistics.LaunchPathInfo pathInfo = Ballistics.GenerateLaunchPathInfo(launchOrigin, GO.forward, throwSpeed);
+            Ballistics.LaunchPathInfo pathInfo = Ballistics.GenerateLaunchPathInfo(launchOrigin, launchDir, GO.forward, throwSpeed);
             Destroy(GO.gameObject);
 
-            Debug.DrawRay(pathInfo.highestPoint, Vector3.down, Color.red);
-
-            if (pathInfo.launchPath.Length > 0)
-            {
-                foreach (var point in pathInfo.launchPath)
-                {
-                    Debug.DrawRay(point, Vector3.down * .25f, Color.blue);
-                }
-            }
-
-            if (pathInfo.hit.HasValue)
-            {
-                Debug.DrawRay(pathInfo.hit.Value.point, pathInfo.hit.Value.normal, Color.red);
-            }
+            return pathInfo;
         }
 
         private static bool CalculateMouseWorldIntersect(Vector2 mousePos, out RaycastHit hitInfo)
