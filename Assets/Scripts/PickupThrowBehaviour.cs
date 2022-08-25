@@ -90,10 +90,11 @@ namespace Character
         private const float ARC_SEGMENT_INTERVAL = 0.005f;
         private const float ARC_MAX_SIMULATION_TIME = 8f;
 
-        [SerializeField] Transform projectilePrefab;
+        [SerializeField] private Transform projectilePrefab;
+        [SerializeField] private Transform arcTarget;
 
         private Controls controls;
-        private LineRenderer lineRenderer;
+        private LineRenderer arcLineRenderer;
         private Ballistics.LaunchPathInfo? launchPathInfo = null;
 
         public float ThrowSpeed { get; set; } = 12;
@@ -104,7 +105,7 @@ namespace Character
 
             if (IsOwner)
             {
-                lineRenderer = GetComponent<LineRenderer>();
+                arcLineRenderer = GetComponent<LineRenderer>();
                 controls = new Controls();
 
                 controls.Default.AimThrow.performed += Aim;
@@ -113,6 +114,8 @@ namespace Character
 
                 controls.Default.AimThrow.Enable();
                 controls.Default.CancelThrow.Enable();
+
+                SetArcActive(false);
             }
         }
 
@@ -206,29 +209,38 @@ namespace Character
 
                     if (launchPathInfo.HasValue)
                     {
-                        lineRenderer.enabled = true;
-                        lineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
-                        lineRenderer.SetPositions(launchPathInfo.Value.launchPath);
+                        SetArcActive(true);
+
+                        arcLineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
+                        arcLineRenderer.SetPositions(launchPathInfo.Value.launchPath);
 
                         if (launchPathInfo.Value.hit.HasValue)
                         {
-                            Debug.DrawRay(launchPathInfo.Value.hit.Value.point, launchPathInfo.Value.hit.Value.normal, Color.red);
+                            arcTarget.position = launchPathInfo.Value.hit.Value.point;
+                            Debug.Log($"Normal: {launchPathInfo.Value.hit.Value.normal}");
+                            arcTarget.LookAt(arcTarget.position + launchPathInfo.Value.hit.Value.normal);
                         }
                     }
                     else
                     {
-                        lineRenderer.enabled = false;
+                        SetArcActive(false);
                     }
                 }
                 else
                 {
-                    lineRenderer.enabled = false;
+                    SetArcActive(false);
                 }
 
                 yield return new WaitForEndOfFrame();
             }
 
-            lineRenderer.enabled = false;
+            SetArcActive(false);
+        }
+
+        private void SetArcActive(bool isActive)
+        {
+            arcLineRenderer.enabled = isActive;
+            arcTarget.gameObject.SetActive(isActive);
         }
 
         #endregion
