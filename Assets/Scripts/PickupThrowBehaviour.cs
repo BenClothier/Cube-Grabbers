@@ -6,6 +6,7 @@ namespace Character
     using Game.Utility.Math;
     using UnityEngine.InputSystem;
     using System.Collections.Generic;
+    using System.Collections;
     using System;
 
     public class PickupThrowBehaviour : NetworkBehaviour
@@ -86,35 +87,16 @@ namespace Character
 
         #region Throw Behaviour
 
+        private const float ARC_SEGMENT_INTERVAL = 0.005f;
+        private const float ARC_MAX_SIMULATION_TIME = 8f;
+
         [SerializeField] Transform projectilePrefab;
 
         private Controls controls;
+        private LineRenderer lineRenderer;
         private Ballistics.LaunchPathInfo? launchPathInfo = null;
 
         public float ThrowSpeed { get; set; } = 12;
-
-        private void LateUpdate()
-        {
-            if (IsInState(State.Aiming) && CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
-            {
-                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed, 0.002f, 8);
-
-                Debug.DrawRay(launchPathInfo.Value.highestPoint, Vector3.down, Color.red);
-
-                if (launchPathInfo.Value.launchPath.Length > 0)
-                {
-                    foreach (var point in launchPathInfo.Value.launchPath)
-                    {
-                        Debug.DrawRay(point, Vector3.down * .25f, Color.blue);
-                    }
-                }
-
-                if (launchPathInfo.Value.hit.HasValue)
-                {
-                    Debug.DrawRay(launchPathInfo.Value.hit.Value.point, launchPathInfo.Value.hit.Value.normal, Color.red);
-                }
-            }
-        }
 
         public override void OnNetworkSpawn()
         {
@@ -122,6 +104,7 @@ namespace Character
 
             if (IsOwner)
             {
+                lineRenderer = GetComponent<LineRenderer>();
                 controls = new Controls();
 
                 controls.Default.AimThrow.performed += Aim;
@@ -141,6 +124,8 @@ namespace Character
             {
                 controls.Default.AimThrow.Disable();
                 controls.Default.CancelThrow.Disable();
+
+                StopAllCoroutines();
             }
         }
 
@@ -170,6 +155,7 @@ namespace Character
             if (IsInState(State.Holding))
             {
                 MoveState(Command.Aim);
+                StartCoroutine(CalculateAndRenderThrowPathRoutine());
             }
         }
 
@@ -208,6 +194,41 @@ namespace Character
             }
 
             return false;
+        }
+
+        private IEnumerator CalculateAndRenderThrowPathRoutine()
+        {
+            while (IsInState(State.Aiming))
+            {
+                if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
+                {
+                    launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
+
+                    if (launchPathInfo.HasValue)
+                    {
+                        lineRenderer.enabled = true;
+                        lineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
+                        lineRenderer.SetPositions(launchPathInfo.Value.launchPath);
+
+                        if (launchPathInfo.Value.hit.HasValue)
+                        {
+                            Debug.DrawRay(launchPathInfo.Value.hit.Value.point, launchPathInfo.Value.hit.Value.normal, Color.red);
+                        }
+                    }
+                    else
+                    {
+                        lineRenderer.enabled = false;
+                    }
+                }
+                else
+                {
+                    lineRenderer.enabled = false;
+                }
+
+                yield return new WaitForEndOfFrame();
+            }
+
+            lineRenderer.enabled = false;
         }
 
         #endregion
