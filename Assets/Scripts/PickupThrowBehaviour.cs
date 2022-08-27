@@ -205,7 +205,7 @@ namespace Character
             {
                 if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
                 {
-                    launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseWorldHitInfo.point, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
+                    launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, (Vector2)mouseWorldHitInfo.point, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
 
                     if (launchPathInfo.HasValue)
                     {
