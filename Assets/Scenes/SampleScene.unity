@@ -487,7 +487,9 @@ MonoBehaviour:
   grids:
   - {fileID: 2059574267}
   - {fileID: 624056543}
-  cell: {fileID: 7532575072343213687, guid: 8047cbf2ea102734da39630d09bb8cd4, type: 3}
+  cell: {fileID: 8000072700634934139, guid: 7a09d355f0157654cb94d0a64b856fd5, type: 3}
+  cellMineable: {fileID: 7532575072343213687, guid: 8047cbf2ea102734da39630d09bb8cd4,
+    type: 3}
   gridFillMin: {x: -10, y: -10}
   gridFillMax: {x: 11, y: -1}
   backGridFillMin: {x: -10, y: -10}

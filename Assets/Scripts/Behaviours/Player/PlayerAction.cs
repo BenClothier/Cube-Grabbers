@@ -11,15 +11,151 @@ namespace Game.Behaviours.Player
     using System.Collections;
     using System;
 
-    public class PickupThrowBehaviour : NetworkBehaviour
+    public class PlayerAction : NetworkBehaviour
     {
-        [SerializeField] private Transform objectHoldingPos;
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
 
-        public Vector3 HoldingPosition => objectHoldingPos.position;
+            if (IsOwner)
+            {
+                InitialiseMiningBehaviour();
+                InitialisePickupThrowBehaviour();
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            if (IsOwner)
+            {
+                ShutdownMiningBehaviour();
+                ShutdownPickupThrowBehaviour();
+            }
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (IsOwner)
+            {
+                CheckTriggerWithPickupBehaviour(other);
+            }
+        }
+
+        #region State Machine
+
+        public State CurrentState { get; private set; }
+
+        private static readonly Dictionary<StateTransition, State> transitions = new Dictionary<StateTransition, State>()
+        {
+            // Pickup/Throw Behaviour
+            { new StateTransition(State.Idle, Command.Pickup), State.HoldingObject },
+            { new StateTransition(State.HoldingObject, Command.Aim), State.Aiming },
+            { new StateTransition(State.Aiming, Command.CancelAim), State.HoldingObject },
+            { new StateTransition(State.Aiming, Command.Throw), State.Idle },
+        };
+
+        private State GetState(Command command)
+        {
+            StateTransition transition = new StateTransition(CurrentState, command);
+
+            if (!transitions.TryGetValue(transition, out State nextState))
+            {
+                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
+            }
+
+            return nextState;
+        }
+
+        public State MoveState(Command command)
+        {
+            CurrentState = GetState(command);
+            Debug.Log($"New State: {CurrentState}");
+            return CurrentState;
+        }
+
+        public bool IsInState(State state) => CurrentState.Equals(state);
+
+        public enum State
+        {
+            Idle,
+            HoldingObject,
+            Aiming,
+        }
+
+        public enum Command
+        {
+            Pickup,
+            Aim,
+            CancelAim,
+            Throw,
+        }
+
+        private struct StateTransition
+        {
+            public State currentState;
+            public Command transition;
+
+            public StateTransition(State currentState, Command transition)
+            {
+                this.currentState = currentState;
+                this.transition = transition;
+            }
+        }
+
+        #endregion
+
+        #region Mining Behaviour
+
+        private void InitialiseMiningBehaviour()
+        {
+            UserInputManager.Instance.OnPrimaryMouseDown += OnPrimaryMouseDown;
+        }
+
+        private void ShutdownMiningBehaviour()
+        {
+            UserInputManager.Instance.OnPrimaryMouseDown -= OnPrimaryMouseDown;
+        }
+
+        private void OnPrimaryMouseDown(InputAction.CallbackContext context)
+        {
+            if (Raycasting.CalculateMouseWorldIntersect(UserInputManager.Instance.MousePos, out RaycastHit hitInfo, new string[] { "Mineable" }))
+            {
+                Destroy(hitInfo.collider.gameObject);
+            }
+        }
+
+        #endregion
+
+        #region Pickup/Throw Behaviour
+
+        private void InitialisePickupThrowBehaviour()
+        {
+            arcLineRenderer = GetComponent<LineRenderer>();
+
+            UserInputManager.Instance.OnPrimaryMouseDown += Aim;
+            UserInputManager.Instance.OnPrimaryMouseUp += Throw;
+            UserInputManager.Instance.OnSecondaryMouseDown += CancelAim;
+
+            SetArcActive(false);
+        }
+
+        private void ShutdownPickupThrowBehaviour()
+        {
+            if (calcAndDrawLaunchPathRoutine is not null)
+            {
+                StopCoroutine(calcAndDrawLaunchPathRoutine);
+            }
+        }
+
+        // PICKUP BEHAVIOUR //
+
+        [SerializeField] private Transform objectHoldingPos;
 
         private GameObject heldObject;
 
-        #region Pickup Behaviour
+        public Vector3 HoldingPosition => objectHoldingPos.position;
 
         [ServerRpc]
         public void RequestPickupServerRpc(ulong pickupNetObjID)
@@ -66,13 +202,7 @@ namespace Game.Behaviours.Player
             }
         }
 
-        private void SpawnHoldable(Pickupable pickupable)
-        {
-            heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos);
-            pickupable.gameObject.SetActive(false);
-        }
-
-        private void OnTriggerEnter(Collider other)
+        private void CheckTriggerWithPickupBehaviour(Collider other)
         {
             if (IsClient && IsOwner && other.gameObject.CompareTag("Pickupable"))
             {
@@ -85,9 +215,13 @@ namespace Game.Behaviours.Player
             }
         }
 
-        #endregion
+        private void SpawnHoldable(Pickupable pickupable)
+        {
+            heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos);
+            pickupable.gameObject.SetActive(false);
+        }
 
-        #region Throw Behaviour
+        // THROW BEHAVIOUR //
 
         private const float ARC_SEGMENT_INTERVAL = 0.005f;
         private const float ARC_MAX_SIMULATION_TIME = 8f;
@@ -97,34 +231,9 @@ namespace Game.Behaviours.Player
 
         private LineRenderer arcLineRenderer;
         private Ballistics.LaunchPathInfo? launchPathInfo = null;
+        private Coroutine calcAndDrawLaunchPathRoutine;
 
         public float ThrowSpeed { get; set; } = 12;
-
-        public override void OnNetworkSpawn()
-        {
-            base.OnNetworkSpawn();
-
-            if (IsOwner)
-            {
-                arcLineRenderer = GetComponent<LineRenderer>();
-
-                UserInputManager.Instance.OnPrimaryMouseDown += Aim;
-                UserInputManager.Instance.OnPrimaryMouseUp += Throw;
-                UserInputManager.Instance.OnSecondaryMouseDown += CancelAim;
-
-                SetArcActive(false);
-            }
-        }
-
-        public override void OnNetworkDespawn()
-        {
-            base.OnNetworkDespawn();
-
-            if (IsOwner)
-            {
-                StopAllCoroutines();
-            }
-        }
 
         [ServerRpc]
         private void RequestThrowServerRpc(Quaternion launchDir)
@@ -149,10 +258,16 @@ namespace Game.Behaviours.Player
 
         private void Aim(InputAction.CallbackContext context)
         {
-            if (IsInState(State.Holding))
+            if (IsInState(State.HoldingObject))
             {
                 MoveState(Command.Aim);
-                StartCoroutine(CalculateAndRenderThrowPathRoutine());
+
+                if (calcAndDrawLaunchPathRoutine is not null)
+                {
+                    StopCoroutine(calcAndDrawLaunchPathRoutine);
+                }
+
+                calcAndDrawLaunchPathRoutine = StartCoroutine(CalculateAndRenderThrowPathRoutine());
             }
         }
 
@@ -217,6 +332,7 @@ namespace Game.Behaviours.Player
                 yield return new WaitForEndOfFrame();
             }
 
+            calcAndDrawLaunchPathRoutine = null;
             SetArcActive(false);
         }
 
@@ -228,66 +344,5 @@ namespace Game.Behaviours.Player
 
         #endregion
 
-        #region State Machine
-
-        public State CurrentState { get; private set; }
-
-        private static readonly Dictionary<StateTransition, State> transitions = new Dictionary<StateTransition, State>()
-        {
-            { new StateTransition(State.Normal, Command.Pickup), State.Holding },
-            { new StateTransition(State.Holding, Command.Aim), State.Aiming },
-            { new StateTransition(State.Aiming, Command.CancelAim), State.Holding },
-            { new StateTransition(State.Aiming, Command.Throw), State.Normal },
-        };
-
-        private State GetState(Command command)
-        {
-            StateTransition transition = new StateTransition(CurrentState, command);
-
-            if (!transitions.TryGetValue(transition, out State nextState))
-            {
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
-            }
-
-            return nextState;
-        }
-
-        public State MoveState(Command command)
-        {
-            CurrentState = GetState(command);
-            Debug.Log($"New State: {CurrentState}");
-            return CurrentState;
-        }
-
-        public bool IsInState(State state) => CurrentState.Equals(state);
-
-        public enum State
-        {
-            Normal,
-            Holding,
-            Aiming,
-        }
-
-        public enum Command
-        {
-            Pickup,
-            Aim,
-            CancelAim,
-            Throw,
-        }
-
-        private struct StateTransition
-        {
-            public State currentState;
-            public Command transition;
-
-            public StateTransition(State currentState, Command transition)
-            {
-                this.currentState = currentState;
-                this.transition = transition;
-            }
-        }
-
-        #endregion
     }
 }

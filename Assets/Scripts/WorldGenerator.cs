@@ -4,7 +4,9 @@ using Game.Utility.Networking;
 public class WorldGenerator : NetworkSingleton<WorldGenerator>
 {
     [SerializeField] private Grid[] grids;
+
     [SerializeField] private GameObject cell;
+    [SerializeField] private GameObject cellMineable;
 
     [SerializeField] private Vector2Int gridFillMin;
     [SerializeField] private Vector2Int gridFillMax;
@@ -21,7 +23,7 @@ public class WorldGenerator : NetworkSingleton<WorldGenerator>
             {
                 for (int y = gridFillMin.y; y <= gridFillMax.y; y++)
                 {
-                    Instantiate(cell, grids[0].CellToWorld(new Vector3Int(x, y, 0)), Quaternion.identity, grids[0].transform);
+                    Instantiate(cellMineable, grids[0].CellToWorld(new Vector3Int(x, y, 0)), Quaternion.identity, grids[0].transform);
                 }
             }
 
