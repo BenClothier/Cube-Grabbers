@@ -70,6 +70,7 @@ namespace Game.Managers
         private void OnEnable()
         {
             controls.Default.Move.Enable();
+            controls.Default.MousePos.Enable();
             controls.Default.PrimaryClick.Enable();
             controls.Default.SecondaryClick.Enable();
         }
@@ -77,6 +78,7 @@ namespace Game.Managers
         private void OnDisable()
         {
             controls.Default.Move.Disable();
+            controls.Default.MousePos.Disable();
             controls.Default.PrimaryClick.Disable();
             controls.Default.SecondaryClick.Disable();
         }
@@ -84,7 +86,6 @@ namespace Game.Managers
         private void FixedUpdate()
         {
             PlayerMovementVector = controls.Default.Move.ReadValue<Vector2>();
-            Debug.Log(controls.Default.MousePos.ReadValue<Vector2>());
             MousePos = controls.Default.MousePos.ReadValue<Vector2>();
         }
     }

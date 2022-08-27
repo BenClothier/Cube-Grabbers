@@ -192,7 +192,6 @@ namespace Game.Behaviours.Player
         /// <returns>desired look-rotation of the character.</returns>
         private Quaternion MouseLook()
         {
-            Debug.Log($"{UserInputManager.Instance.MousePos.x} < {Screen.width / 2}");
             return Quaternion.LookRotation(UserInputManager.Instance.MousePos.x < Screen.width / 2 ? Vector3.left : Vector3.right, Vector3.up);
         }
 
