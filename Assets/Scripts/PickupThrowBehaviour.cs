@@ -1,7 +1,7 @@
 namespace Game.Behaviours.Player
 {
     using Game.Utility.Networking;
-    using Game.Utility.Math;
+    using Game.Utility;
     using Game.Managers;
 
     using UnityEngine;
@@ -182,22 +182,11 @@ namespace Game.Behaviours.Player
             }
         }
 
-        private static bool CalculateMouseWorldIntersect(Vector2 mousePos, out RaycastHit hitInfo)
-        {
-            Ray pointerRay = Camera.main.ScreenPointToRay(mousePos);
-            if (Physics.Raycast(pointerRay, out hitInfo, 200, LayerMask.GetMask("Default")))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         private IEnumerator CalculateAndRenderThrowPathRoutine()
         {
             while (IsInState(State.Aiming))
             {
-                if (CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo))
+                if (Raycasting.CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo, layermask: LayerMask.GetMask("Default")))
                 {
                     launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, (Vector2)mouseWorldHitInfo.point, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
 

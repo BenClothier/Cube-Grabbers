@@ -1,12 +1,10 @@
 namespace Game.Behaviours.Player
 {
-    using Game.Utility.Math;
     using Game.Managers;
 
     using UnityEngine;
     using Unity.Netcode;
     using Cinemachine;
-    using UnityEngine.UIElements;
 
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
@@ -193,17 +191,6 @@ namespace Game.Behaviours.Player
         private Quaternion MouseLook()
         {
             return Quaternion.LookRotation(UserInputManager.Instance.MousePos.x < Screen.width / 2 ? Vector3.left : Vector3.right, Vector3.up);
-        }
-
-        /// <summary>
-        /// Adjusts the mouse world position calculation to take into account the camera's x rotation.
-        /// </summary>
-        /// <param name="mousePos">the screen position of the mouse.</param>
-        /// <returns>actual mouse world position.</returns>
-        private Vector3 CalculateMouseWorldPos(Vector2 mousePos)
-        {
-            Ray pointerRay = Camera.main.ScreenPointToRay(mousePos);
-            return GameMath.CalcPointOfPlaneIntersect(transform.position, Vector3.up, pointerRay.origin, pointerRay.direction);
         }
 
         #endregion

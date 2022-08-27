@@ -1,6 +1,5 @@
-namespace Game.Utility.Math
+namespace Game.Utility
 {
-    using System;
     using UnityEngine;
 
     public static class GameMath
@@ -55,7 +54,7 @@ namespace Game.Utility.Math
             float deviationLowerOffset = .5f * (1 - deviationMultiplier) * (1.3f + (deviationMultiplier / 2));
             float deviationUpperOffset = .5f * (1 - deviationMultiplier) / (1.3f + (deviationMultiplier / 2));
 
-            return -Mathf.Log(1 - UnityEngine.Random.Range(deviationLowerOffset, Math.Min(1 - deviationUpperOffset, 0.999999f))) / rate;
+            return -Mathf.Log(1 - UnityEngine.Random.Range(deviationLowerOffset, Mathf.Min(1 - deviationUpperOffset, 0.999999f))) / rate;
         }
     }
 }

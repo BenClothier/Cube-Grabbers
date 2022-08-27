@@ -1,4 +1,4 @@
-namespace Game.Utility.Math
+namespace Game.Utility
 {
     using System.Linq;
     using UnityEngine;
