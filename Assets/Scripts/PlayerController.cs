@@ -204,7 +204,7 @@ public class PlayerController : NetworkBehaviour
     private Vector3 GetNewTargetVelocity()
     {
         Vector2 moveVector = movement.ReadValue<Vector2>();
-        return new Vector3(moveVector.x, 0, moveVector.y) * speed;
+        return moveVector * speed;
     }
 
     /// <summary>
