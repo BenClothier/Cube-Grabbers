@@ -487,7 +487,7 @@ MonoBehaviour:
   grids:
   - {fileID: 2059574267}
   - {fileID: 624056543}
-  cell: {fileID: 8000072700634934139, guid: 7a09d355f0157654cb94d0a64b856fd5, type: 3}
+  cell: {fileID: 7532575072343213687, guid: 8047cbf2ea102734da39630d09bb8cd4, type: 3}
   gridFillMin: {x: -10, y: -10}
   gridFillMax: {x: 11, y: -1}
   backGridFillMin: {x: -10, y: -10}
@@ -601,6 +601,50 @@ Camera:
     type: 3}
   m_PrefabInstance: {fileID: 4887777158914160761}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1899022390
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1899022391}
+  - component: {fileID: 1899022392}
+  m_Layer: 0
+  m_Name: GameInputManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1899022391
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1899022390}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1899022392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1899022390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93f789505b707c44ab3f79651386a7c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2059574266
 GameObject:
   m_ObjectHideFlags: 0

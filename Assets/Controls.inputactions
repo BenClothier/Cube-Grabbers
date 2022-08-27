@@ -15,7 +15,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Look",
+                    "name": "MousePos",
                     "type": "Value",
                     "id": "0940bc40-cf5c-4ae5-a00c-40de4d885356",
                     "expectedControlType": "Vector2",
@@ -24,16 +24,16 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Aim/Throw",
+                    "name": "Primary Click",
                     "type": "Button",
                     "id": "2611962c-ed34-4523-9f9d-f4425a60e770",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": false
                 },
                 {
-                    "name": "CancelThrow",
+                    "name": "Secondary Click",
                     "type": "Button",
                     "id": "d7e86670-b64a-4a1b-bf1b-0759a043cdbb",
                     "expectedControlType": "Button",
@@ -105,7 +105,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Look",
+                    "action": "MousePos",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -116,7 +116,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Aim/Throw",
+                    "action": "Primary Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -127,18 +127,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "CancelThrow",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "63a3a4c3-26c7-4068-a1f2-6703997e9da2",
-                    "path": "<Gamepad>/rightStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Look",
+                    "action": "Secondary Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -1,9 +1,11 @@
-namespace Character
+namespace Game.Behaviours.Player
 {
-    using UnityEngine;
-    using Unity.Netcode;
     using Game.Utility.Networking;
     using Game.Utility.Math;
+    using Game.Managers;
+
+    using UnityEngine;
+    using Unity.Netcode;
     using UnityEngine.InputSystem;
     using System.Collections.Generic;
     using System.Collections;
@@ -93,7 +95,6 @@ namespace Character
         [SerializeField] private Transform projectilePrefab;
         [SerializeField] private Transform arcTarget;
 
-        private Controls controls;
         private LineRenderer arcLineRenderer;
         private Ballistics.LaunchPathInfo? launchPathInfo = null;
 
@@ -106,14 +107,10 @@ namespace Character
             if (IsOwner)
             {
                 arcLineRenderer = GetComponent<LineRenderer>();
-                controls = new Controls();
 
-                controls.Default.AimThrow.performed += Aim;
-                controls.Default.AimThrow.canceled += Throw;
-                controls.Default.CancelThrow.performed += CancelAim;
-
-                controls.Default.AimThrow.Enable();
-                controls.Default.CancelThrow.Enable();
+                UserInputManager.Instance.OnPrimaryMouseDown += Aim;
+                UserInputManager.Instance.OnPrimaryMouseUp += Throw;
+                UserInputManager.Instance.OnSecondaryMouseDown += CancelAim;
 
                 SetArcActive(false);
             }
@@ -123,11 +120,8 @@ namespace Character
         {
             base.OnNetworkDespawn();
 
-            if (IsOwner && controls is not null)
+            if (IsOwner)
             {
-                controls.Default.AimThrow.Disable();
-                controls.Default.CancelThrow.Disable();
-
                 StopAllCoroutines();
             }
         }

@@ -37,7 +37,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Look"",
+                    ""name"": ""MousePos"",
                     ""type"": ""Value"",
                     ""id"": ""0940bc40-cf5c-4ae5-a00c-40de4d885356"",
                     ""expectedControlType"": ""Vector2"",
@@ -46,16 +46,16 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Aim/Throw"",
+                    ""name"": ""Primary Click"",
                     ""type"": ""Button"",
                     ""id"": ""2611962c-ed34-4523-9f9d-f4425a60e770"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": true
+                    ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""CancelThrow"",
+                    ""name"": ""Secondary Click"",
                     ""type"": ""Button"",
                     ""id"": ""d7e86670-b64a-4a1b-bf1b-0759a043cdbb"",
                     ""expectedControlType"": ""Button"",
@@ -127,7 +127,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Look"",
+                    ""action"": ""MousePos"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -138,7 +138,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Aim/Throw"",
+                    ""action"": ""Primary Click"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -149,18 +149,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""CancelThrow"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""63a3a4c3-26c7-4068-a1f2-6703997e9da2"",
-                    ""path"": ""<Gamepad>/rightStick"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Look"",
+                    ""action"": ""Secondary Click"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -172,9 +161,9 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         // Default
         m_Default = asset.FindActionMap("Default", throwIfNotFound: true);
         m_Default_Move = m_Default.FindAction("Move", throwIfNotFound: true);
-        m_Default_Look = m_Default.FindAction("Look", throwIfNotFound: true);
-        m_Default_AimThrow = m_Default.FindAction("Aim/Throw", throwIfNotFound: true);
-        m_Default_CancelThrow = m_Default.FindAction("CancelThrow", throwIfNotFound: true);
+        m_Default_MousePos = m_Default.FindAction("MousePos", throwIfNotFound: true);
+        m_Default_PrimaryClick = m_Default.FindAction("Primary Click", throwIfNotFound: true);
+        m_Default_SecondaryClick = m_Default.FindAction("Secondary Click", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -235,17 +224,17 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Default;
     private IDefaultActions m_DefaultActionsCallbackInterface;
     private readonly InputAction m_Default_Move;
-    private readonly InputAction m_Default_Look;
-    private readonly InputAction m_Default_AimThrow;
-    private readonly InputAction m_Default_CancelThrow;
+    private readonly InputAction m_Default_MousePos;
+    private readonly InputAction m_Default_PrimaryClick;
+    private readonly InputAction m_Default_SecondaryClick;
     public struct DefaultActions
     {
         private @Controls m_Wrapper;
         public DefaultActions(@Controls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Default_Move;
-        public InputAction @Look => m_Wrapper.m_Default_Look;
-        public InputAction @AimThrow => m_Wrapper.m_Default_AimThrow;
-        public InputAction @CancelThrow => m_Wrapper.m_Default_CancelThrow;
+        public InputAction @MousePos => m_Wrapper.m_Default_MousePos;
+        public InputAction @PrimaryClick => m_Wrapper.m_Default_PrimaryClick;
+        public InputAction @SecondaryClick => m_Wrapper.m_Default_SecondaryClick;
         public InputActionMap Get() { return m_Wrapper.m_Default; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -258,15 +247,15 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Move.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
                 @Move.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
                 @Move.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
-                @Look.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnLook;
-                @Look.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnLook;
-                @Look.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnLook;
-                @AimThrow.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnAimThrow;
-                @AimThrow.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnAimThrow;
-                @AimThrow.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnAimThrow;
-                @CancelThrow.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnCancelThrow;
-                @CancelThrow.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnCancelThrow;
-                @CancelThrow.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnCancelThrow;
+                @MousePos.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMousePos;
+                @MousePos.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMousePos;
+                @MousePos.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMousePos;
+                @PrimaryClick.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnPrimaryClick;
+                @PrimaryClick.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnPrimaryClick;
+                @PrimaryClick.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnPrimaryClick;
+                @SecondaryClick.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnSecondaryClick;
+                @SecondaryClick.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnSecondaryClick;
+                @SecondaryClick.canceled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnSecondaryClick;
             }
             m_Wrapper.m_DefaultActionsCallbackInterface = instance;
             if (instance != null)
@@ -274,15 +263,15 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
-                @Look.started += instance.OnLook;
-                @Look.performed += instance.OnLook;
-                @Look.canceled += instance.OnLook;
-                @AimThrow.started += instance.OnAimThrow;
-                @AimThrow.performed += instance.OnAimThrow;
-                @AimThrow.canceled += instance.OnAimThrow;
-                @CancelThrow.started += instance.OnCancelThrow;
-                @CancelThrow.performed += instance.OnCancelThrow;
-                @CancelThrow.canceled += instance.OnCancelThrow;
+                @MousePos.started += instance.OnMousePos;
+                @MousePos.performed += instance.OnMousePos;
+                @MousePos.canceled += instance.OnMousePos;
+                @PrimaryClick.started += instance.OnPrimaryClick;
+                @PrimaryClick.performed += instance.OnPrimaryClick;
+                @PrimaryClick.canceled += instance.OnPrimaryClick;
+                @SecondaryClick.started += instance.OnSecondaryClick;
+                @SecondaryClick.performed += instance.OnSecondaryClick;
+                @SecondaryClick.canceled += instance.OnSecondaryClick;
             }
         }
     }
@@ -290,8 +279,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     public interface IDefaultActions
     {
         void OnMove(InputAction.CallbackContext context);
-        void OnLook(InputAction.CallbackContext context);
-        void OnAimThrow(InputAction.CallbackContext context);
-        void OnCancelThrow(InputAction.CallbackContext context);
+        void OnMousePos(InputAction.CallbackContext context);
+        void OnPrimaryClick(InputAction.CallbackContext context);
+        void OnSecondaryClick(InputAction.CallbackContext context);
     }
 }
