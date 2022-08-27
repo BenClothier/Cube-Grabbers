@@ -9,7 +9,7 @@ namespace Game.Behaviours.Player
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(NetworkObject))]
-    public class PlayerController : NetworkBehaviour
+    public class PlayerMovement : NetworkBehaviour
     {
         /// <summary>
         /// <para>Speed at which the character's local position will be corrected to the server position.</para>
