@@ -204,7 +204,7 @@ namespace Game.Behaviours.Player
 
         private void CheckTriggerWithPickupBehaviour(Collider other)
         {
-            if (IsClient && IsOwner && other.gameObject.CompareTag("Pickupable"))
+            if (IsInState(State.Idle) && IsClient && IsOwner && other.gameObject.CompareTag("Pickupable"))
             {
                 Pickupable pickupable = other.gameObject.GetComponent<Pickupable>();
 
