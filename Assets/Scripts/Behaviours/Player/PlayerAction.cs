@@ -300,27 +300,20 @@ namespace Game.Behaviours.Player
         {
             while (IsInState(State.Aiming))
             {
-                if (Raycasting.CalculateMouseWorldIntersect(Mouse.current.position.ReadValue(), out RaycastHit mouseWorldHitInfo, layermask: LayerMask.GetMask("Default")))
+                Vector3 mouseWorldPoint = Raycasting.CalculateMousePlaneInstersect(Mouse.current.position.ReadValue(), Vector3.zero, Vector3.back);
+                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseWorldPoint, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
+
+                if (launchPathInfo.HasValue)
                 {
-                    launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, (Vector2)mouseWorldHitInfo.point, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
+                    SetArcActive(true);
 
-                    if (launchPathInfo.HasValue)
+                    arcLineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
+                    arcLineRenderer.SetPositions(launchPathInfo.Value.launchPath);
+
+                    if (launchPathInfo.Value.hit.HasValue)
                     {
-                        SetArcActive(true);
-
-                        arcLineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
-                        arcLineRenderer.SetPositions(launchPathInfo.Value.launchPath);
-
-                        if (launchPathInfo.Value.hit.HasValue)
-                        {
-                            arcTarget.position = launchPathInfo.Value.hit.Value.point;
-                            Debug.Log($"Normal: {launchPathInfo.Value.hit.Value.normal}");
-                            arcTarget.LookAt(arcTarget.position + launchPathInfo.Value.hit.Value.normal);
-                        }
-                    }
-                    else
-                    {
-                        SetArcActive(false);
+                        arcTarget.position = launchPathInfo.Value.hit.Value.point;
+                        arcTarget.LookAt(arcTarget.position + launchPathInfo.Value.hit.Value.normal);
                     }
                 }
                 else
