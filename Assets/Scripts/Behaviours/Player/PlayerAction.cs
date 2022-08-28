@@ -237,9 +237,9 @@ namespace Game.Behaviours.Player
         [ServerRpc]
         private void RequestThrowServerRpc(Quaternion launchDir)
         {
-            Transform projectile = Instantiate(heldObject.PickupPrefab, HoldingPosition, launchDir).transform;
+            Transform projectile = Instantiate(heldObject.PickupPrefab, HoldingPosition, Quaternion.identity).transform;
             projectile.GetComponent<NetworkObject>().Spawn();
-            projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * ThrowSpeed;
+            projectile.GetComponent<Rigidbody>().velocity = launchDir * Vector3.forward * ThrowSpeed;
             GrantThrowClientRpc();
         }
 
