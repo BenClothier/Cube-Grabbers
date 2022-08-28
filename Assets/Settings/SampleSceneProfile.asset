@@ -116,7 +116,7 @@ MonoBehaviour:
   active: 1
   pixelsPerUnit:
     m_OverrideState: 1
-    m_Value: 19
+    m_Value: 1080
 --- !u!114 &3129536948176610976
 MonoBehaviour:
   m_ObjectHideFlags: 3
