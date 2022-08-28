@@ -120,7 +120,7 @@ namespace Game.Behaviours.Player
 
         private void OnPrimaryMouseDown(InputAction.CallbackContext context)
         {
-            if (Raycasting.CalculateMouseWorldIntersect(UserInputManager.Instance.MousePos, out RaycastHit hitInfo, new string[] { "Mineable" }))
+            if (IsInState(State.Idle) && Raycasting.CalculateMouseWorldIntersect(UserInputManager.Instance.MousePos, out RaycastHit hitInfo, new string[] { "Mineable" }))
             {
                 Destroy(hitInfo.collider.gameObject);
             }
@@ -153,7 +153,7 @@ namespace Game.Behaviours.Player
 
         [SerializeField] private Transform objectHoldingPos;
 
-        private GameObject heldObject;
+        private Holdable heldObject;
 
         public Vector3 HoldingPosition => objectHoldingPos.position;
 
@@ -217,7 +217,7 @@ namespace Game.Behaviours.Player
 
         private void SpawnHoldable(Pickupable pickupable)
         {
-            heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos);
+            heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos).GetComponent<Holdable>();
             pickupable.gameObject.SetActive(false);
         }
 
@@ -226,7 +226,6 @@ namespace Game.Behaviours.Player
         private const float ARC_SEGMENT_INTERVAL = 0.005f;
         private const float ARC_MAX_SIMULATION_TIME = 8f;
 
-        [SerializeField] private Transform projectilePrefab;
         [SerializeField] private Transform arcTarget;
 
         private LineRenderer arcLineRenderer;
@@ -238,7 +237,7 @@ namespace Game.Behaviours.Player
         [ServerRpc]
         private void RequestThrowServerRpc(Quaternion launchDir)
         {
-            Transform projectile = Instantiate(projectilePrefab, HoldingPosition, launchDir);
+            Transform projectile = Instantiate(heldObject.PickupPrefab, HoldingPosition, launchDir).transform;
             projectile.GetComponent<NetworkObject>().Spawn();
             projectile.GetComponent<Rigidbody>().velocity = projectile.transform.forward * ThrowSpeed;
             GrantThrowClientRpc();
@@ -247,7 +246,7 @@ namespace Game.Behaviours.Player
         [ClientRpc]
         private void GrantThrowClientRpc()
         {
-            Destroy(heldObject);
+            Destroy(heldObject.gameObject);
             heldObject = null;
 
             if (IsOwner)

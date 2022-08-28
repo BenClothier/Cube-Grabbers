@@ -4,5 +4,7 @@ namespace Game.Behaviours
 
     public class Holdable : MonoBehaviour
     {
+        [SerializeField] private Pickupable pickupPrefab;
+        public GameObject PickupPrefab => pickupPrefab.gameObject;
     }
 }
