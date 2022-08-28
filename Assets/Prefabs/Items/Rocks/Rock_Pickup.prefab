@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2238375769194123553}
   - component: {fileID: 9057044018643178757}
-  - component: {fileID: -1101096358786732515}
+  - component: {fileID: 6240946891917540226}
   - component: {fileID: 4307602966965284455}
   - component: {fileID: 7466160813566607217}
   - component: {fileID: 4359233612418496874}
@@ -53,8 +53,8 @@ MonoBehaviour:
   holdablePrefab: {fileID: 5647143868787915011, guid: 6c3d83c507c82c14e98ec1b991f4fa55,
     type: 3}
   timeUntilPickupable: 1
---- !u!136 &-1101096358786732515
-CapsuleCollider:
+--- !u!135 &6240946891917540226
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -63,9 +63,8 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.25
-  m_Height: 0.6
-  m_Direction: 0
+  serializedVersion: 2
+  m_Radius: 0.55
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4307602966965284455
 Rigidbody:
@@ -212,8 +211,8 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 5226459335471735394}
   m_PrefabAsset: {fileID: 0}
---- !u!136 &7230877043658787413
-CapsuleCollider:
+--- !u!64 &8641248213714196991
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -222,10 +221,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 0
-  m_Center: {x: 0, y: 0, z: 0}
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4013275331872712965, guid: d27e07c6f72e67a4981c1c1a311a8e19, type: 3}
 --- !u!4 &4476691129971670642 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8550220017806564368, guid: 490a6f43d8bc4274994e901b813725b5,
