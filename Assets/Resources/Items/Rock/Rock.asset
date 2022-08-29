@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3180d1afa2dd8d04a83e531ab64b3202, type: 3}
+  m_Name: Rock
+  m_EditorClassIdentifier: 
+  id: 0
+  pickupPrefab: {fileID: 9057044018643178757, guid: 7b5805e0b98795740870641fb70124de,
+    type: 3}
+  holdablePrefab: {fileID: 5647143868787915011, guid: 6c3d83c507c82c14e98ec1b991f4fa55,
+    type: 3}

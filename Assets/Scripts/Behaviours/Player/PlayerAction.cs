@@ -3,6 +3,7 @@ namespace Game.Behaviours.Player
     using Game.Utility.Networking;
     using Game.Utility;
     using Game.Managers;
+    using Game.DataAssets;
 
     using UnityEngine;
     using Unity.Netcode;
@@ -217,8 +218,11 @@ namespace Game.Behaviours.Player
 
         private void SpawnHoldable(Pickupable pickupable)
         {
-            heldObject = Instantiate(pickupable.HoldablePrefab, objectHoldingPos).GetComponent<Holdable>();
-            pickupable.gameObject.SetActive(false);
+            if (ItemDatabase.Instance.GetItemByID(pickupable.ItemID, out Item itemData))
+            {
+                heldObject = Instantiate(itemData.HoldablePrefab, objectHoldingPos).GetComponent<Holdable>();
+                pickupable.gameObject.SetActive(false);
+            }
         }
 
         // THROW BEHAVIOUR //
@@ -237,10 +241,13 @@ namespace Game.Behaviours.Player
         [ServerRpc]
         private void RequestThrowServerRpc(Quaternion launchDir)
         {
-            Transform projectile = Instantiate(heldObject.PickupPrefab, HoldingPosition, Quaternion.identity).transform;
-            projectile.GetComponent<NetworkObject>().Spawn();
-            projectile.GetComponent<Rigidbody>().velocity = launchDir * Vector3.forward * ThrowSpeed;
-            GrantThrowClientRpc();
+            if (ItemDatabase.Instance.GetItemByID(heldObject.ItemID, out Item itemData))
+            {
+                Transform projectile = Instantiate(itemData.PickupPrefab, HoldingPosition, Quaternion.identity).transform;
+                projectile.GetComponent<NetworkObject>().Spawn();
+                projectile.GetComponent<Rigidbody>().velocity = launchDir * Vector3.forward * ThrowSpeed;
+                GrantThrowClientRpc();
+            }
         }
 
         [ClientRpc]

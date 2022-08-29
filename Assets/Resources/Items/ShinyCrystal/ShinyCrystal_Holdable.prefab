@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8810358640039870370}
   - component: {fileID: 7226550322120026300}
   m_Layer: 0
-  m_Name: SinyCube_Holdable
+  m_Name: ShinyCrystal_Holdable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

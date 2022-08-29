@@ -4,7 +4,13 @@ namespace Game.Behaviours
 
     public class Holdable : MonoBehaviour
     {
-        [SerializeField] private Pickupable pickupPrefab;
-        public GameObject PickupPrefab => pickupPrefab.gameObject;
+        [SerializeField] private int itemID;
+
+        public int ItemID => itemID;
+
+        public void SetItemID(int id)
+        {
+            itemID = id;
+        }
     }
 }

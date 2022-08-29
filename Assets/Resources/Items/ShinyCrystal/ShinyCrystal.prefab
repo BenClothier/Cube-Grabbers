@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 26201596627976046}
   - component: {fileID: 26201596627976047}
   m_Layer: 0
-  m_Name: ShinyCube
+  m_Name: ShinyCrystal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

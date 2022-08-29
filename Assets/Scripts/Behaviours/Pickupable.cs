@@ -9,12 +9,13 @@ namespace Game.Behaviours
     {
         private readonly NetworkVariable<bool> isPickupable = new(false);
 
-        [SerializeField] private Holdable holdablePrefab;
+        [SerializeField] private int itemID;
+        [Space]
         [SerializeField] private float timeUntilPickupable = 1f;
 
-        public bool IsPickupable => isPickupable.Value;
+        public int ItemID => itemID;
 
-        public GameObject HoldablePrefab => holdablePrefab.gameObject;
+        public bool IsPickupable => isPickupable.Value;
 
         public override void OnNetworkSpawn()
         {
@@ -25,6 +26,11 @@ namespace Game.Behaviours
                 isPickupable.Value = false;
                 StartCoroutine(WaitToEnablePickup());
             }
+        }
+
+        public void SetItemID(int id)
+        {
+            itemID = id;
         }
 
         private IEnumerator WaitToEnablePickup()
