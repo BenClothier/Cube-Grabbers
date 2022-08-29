@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32d09d72e2d4a7149bc571ada28490b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupPrefab: {fileID: 1800823237, guid: 48a9dc666a2a86b4890e23e03f73b0c0, type: 3}
+  itemID: 1
 --- !u!1001 &175522040427082079
 PrefabInstance:
   m_ObjectHideFlags: 0

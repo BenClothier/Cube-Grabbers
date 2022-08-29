@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e76a4e3c25673248bcb70bac6f7f2c3, type: 3}
+  m_Name: Stone
+  m_EditorClassIdentifier: 
+  id: 0
+  itemDropChances:
+  - ItemID: 0
+    dropChance: 1
+  - ItemID: 0
+    dropChance: 0.4
+  - ItemID: 1
+    dropChance: 0.1
+  cellPrefab: {fileID: 8000072700634934139, guid: 7a09d355f0157654cb94d0a64b856fd5,
+    type: 3}
+  mineableCellPrefab: {fileID: 6753801058835408217, guid: 8047cbf2ea102734da39630d09bb8cd4,
+    type: 3}

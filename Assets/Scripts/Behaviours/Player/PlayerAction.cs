@@ -123,8 +123,14 @@ namespace Game.Behaviours.Player
         {
             if (IsInState(State.Idle) && Raycasting.CalculateMouseWorldIntersect(UserInputManager.Instance.MousePos, out RaycastHit hitInfo, new string[] { "Mineable" }))
             {
-                Destroy(hitInfo.collider.gameObject);
+                RequestMineCellServerRpc(WorldController.Instance.GetCellPosFromWorldPos(hitInfo.collider.transform.position));
             }
+        }
+
+        [ServerRpc]
+        public void RequestMineCellServerRpc(Vector2Int cellPosition)
+        {
+            WorldController.Instance.MineCell(cellPosition);
         }
 
         #endregion

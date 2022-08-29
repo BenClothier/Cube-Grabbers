@@ -15,11 +15,5 @@ namespace Game.DataAssets
         public GameObject PickupPrefab => pickupPrefab.gameObject;
 
         public GameObject HoldablePrefab => holdablePrefab.gameObject;
-
-        private void OnValidate()
-        {
-            pickupPrefab.SetItemID(id);
-            holdablePrefab.SetItemID(id);
-        }
     }
 }
