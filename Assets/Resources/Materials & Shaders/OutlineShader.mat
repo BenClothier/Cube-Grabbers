@@ -49,7 +49,7 @@ Material:
     - _Cull: 2
     - _Cutoff: 0.5
     - _DstBlend: 0
-    - _LineWidth: 0.1
+    - _LineWidth: -0.01
     - _QueueControl: 0
     - _QueueOffset: 0
     - _SampleGI: 0
