@@ -173,7 +173,7 @@ namespace Game.Behaviours.Player
                     SpawnHoldable(pickupable);
 
                     GrantPickupClientRpc(pickupNetObjID);
-                    NetworkingTools.DespawnAfterSeconds(pickupable.NetworkObject, 2);
+                    StartCoroutine(NetworkingTools.DespawnAfterSeconds(pickupable.NetworkObject, 2));
 
                     if (IsOwner)
                     {
