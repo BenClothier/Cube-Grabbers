@@ -143,7 +143,6 @@ namespace Game.Behaviours.Player
             UserInputManager.Instance.OnPrimaryMouseUp += Throw;
             UserInputManager.Instance.OnSecondaryMouseDown += CancelAim;
 
-            arcLineRenderer = GetComponent<LineRenderer>();
             arcTargetInstance = Instantiate(arcTargetPrefab, transform).transform;
             SetArcActive(false);
         }
@@ -236,10 +235,16 @@ namespace Game.Behaviours.Player
         private const float ARC_SEGMENT_INTERVAL = 0.005f;
         private const float ARC_MAX_SIMULATION_TIME = 8f;
 
+        [Header("Throwing")]
+        [SerializeField] private float throwSpeedMultiplier;
+        [SerializeField] private float maxThrowSpeed;
+        [SerializeField] private float minThrowSpeed;
+        [Space]
         [SerializeField] private GameObject arcTargetPrefab;
-        private Transform arcTargetInstance;
+        [SerializeField] private LineRenderer throwArcLineRenderer;
+        [SerializeField] private LineRenderer throwTangentLineRenderer;
 
-        private LineRenderer arcLineRenderer;
+        private Transform arcTargetInstance;
         private Ballistics.LaunchPathInfo? launchPathInfo = null;
         private Coroutine calcAndDrawLaunchPathRoutine;
 
@@ -290,7 +295,7 @@ namespace Game.Behaviours.Player
             {
                 if (launchPathInfo.HasValue)
                 {
-                    RequestThrowServerRpc(launchPathInfo.Value.launchDir, 12);
+                    RequestThrowServerRpc(launchPathInfo.Value.launchDir, launchPathInfo.Value.launchSpeed);
                     launchPathInfo = null;
                 }
                 else
@@ -315,14 +320,23 @@ namespace Game.Behaviours.Player
             while (IsInState(State.Aiming))
             {
                 Vector3 mouseWorldPoint = Raycasting.CalculateMousePlaneInstersect(Mouse.current.position.ReadValue(), Vector3.zero, Vector3.back);
-                Vector3 throwDir = (mouseWorldPoint - HoldingPosition).normalized;
-                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, throwDir, 12, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
+
+                Vector3 mouseVector = mouseWorldPoint - HoldingPosition;
+                Vector3 throwDir = mouseVector.normalized;
+                float throwSpeed = Mathf.Clamp(mouseVector.magnitude * throwSpeedMultiplier, minThrowSpeed, maxThrowSpeed);
+                Vector3 throwTangent = (throwSpeed / throwSpeedMultiplier) * throwDir;
+
+                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseVector.normalized, throwSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
 
                 if (launchPathInfo.HasValue)
                 {
                     SetArcActive(true);
-                    arcLineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
-                    arcLineRenderer.SetPositions(launchPathInfo.Value.launchPath);
+                    throwArcLineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
+                    throwArcLineRenderer.SetPositions(launchPathInfo.Value.launchPath);
+
+                    throwTangentLineRenderer.positionCount = 2;
+                    throwTangentLineRenderer.SetPosition(0, HoldingPosition);
+                    throwTangentLineRenderer.SetPosition(1, HoldingPosition + throwTangent);
 
                     if (launchPathInfo.Value.hit.HasValue)
                     {
@@ -348,7 +362,8 @@ namespace Game.Behaviours.Player
 
         private void SetArcActive(bool isActive)
         {
-            arcLineRenderer.enabled = isActive;
+            throwArcLineRenderer.enabled = isActive;
+            throwTangentLineRenderer.enabled = isActive;
             arcTargetInstance.gameObject.SetActive(isActive);
         }
 

@@ -54,6 +54,7 @@ namespace Game.Utility
             LaunchPathInfo launchPathInfo = default;
             launchPathInfo.launchDir = launchDir;
             launchPathInfo.launchPath = positions;
+            launchPathInfo.launchSpeed = launchSpeed;
             return launchPathInfo;
         }
 
@@ -142,6 +143,7 @@ namespace Game.Utility
             public Vector3 highestPoint;
             public Vector3[] launchPath;
             public Quaternion launchDir;
+            public float launchSpeed;
         }
     }
 }

@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DottedLine
+  m_Name: ThrowArc
   m_Shader: {fileID: -6465566751694194690, guid: 75b1658a3c3ec04429789c8ca18eea19,
     type: 3}
   m_ValidKeywords: []
