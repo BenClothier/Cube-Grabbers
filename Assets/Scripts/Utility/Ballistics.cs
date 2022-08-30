@@ -14,49 +14,10 @@ namespace Game.Utility
         /// <param name="timeResolution">The time interval between each path point.</param>
         /// <param name="maxTime">Max time to simulate.</param>
         /// <returns></returns>
-        public static LaunchPathInfo GenerateComplexTrajectoryPath(Vector3 launchOrigin, Vector3 launchTarget, float launchSpeed, float timeResolution = 0.002f, float maxTime = 8)
+        public static LaunchPathInfo GenerateComplexTrajectoryPath(Vector3 launchOrigin, Vector3 launchDir, float launchSpeed, float timeResolution = 0.002f, float maxTime = 8, bool isHighAngle = false)
         {
-            CalculateTrajectoryAngle(launchOrigin, launchTarget, launchSpeed, out float angle);
-            TrajectoryAngleToLookDir(launchOrigin, launchTarget, angle, out Quaternion launchDir);
-
-            LaunchPathInfo path = GenerateBasicBallisticPath(launchOrigin, launchDir, launchSpeed, timeResolution, maxTime);
+            LaunchPathInfo path = GenerateBasicBallisticPath(launchOrigin, Quaternion.LookRotation(launchDir, Vector3.up), launchSpeed, timeResolution, maxTime);
             return GenerateCollisionBalisticPath(path);
-        }
-
-        /// <summary>
-        /// Calculate the lanch angle.
-        /// </summary>
-        /// <param name="launchOrigin">The start position of the launched projectile.</param>
-        /// <param name="launchTarget">The target position for the projectile to hit.</param>
-        /// <param name="launchSpeed">The speed at which to launch the projectile.</param>
-        /// <param name="angle">The calculated angle of trajectory.</param>
-        /// <param name="isHighAngle">Whether to calculate the high angle rather than the low angle (since there are two possible trajectories).</param>
-        /// <returns>The angle for the projectile to be launched at.</returns>
-        private static bool CalculateTrajectoryAngle(Vector3 launchOrigin, Vector3 launchTarget, float launchSpeed, out float angle, bool isHighAngle = true)
-        {
-            Vector3 dir = launchTarget - launchOrigin;
-            float vSqr = launchSpeed * launchSpeed;
-            float y = dir.y;
-
-            dir.y = 0.0f;
-            float x = dir.sqrMagnitude;
-
-            float g = -Physics.gravity.y;
-
-            float uRoot = vSqr * vSqr - g * (g * (x) + (2.0f * y * vSqr));
-
-            if (uRoot < 0.0f)
-            {
-                angle = -45.0f;
-                return false;
-            }
-
-            float r = Mathf.Sqrt(uRoot);
-            float bottom = g * Mathf.Sqrt(x);
-
-            angle = isHighAngle ? -(Mathf.Atan2(vSqr + r, bottom) * Mathf.Rad2Deg) : -(Mathf.Atan2(vSqr - r, bottom) * Mathf.Rad2Deg);
-            return true;
-
         }
 
         /// <summary>
@@ -130,6 +91,42 @@ namespace Game.Utility
             Vector3 wantedRotationVector = Quaternion.LookRotation(end - start).eulerAngles;
             wantedRotationVector.x = angle;
             launchDir = Quaternion.Euler(wantedRotationVector);
+        }
+
+        /// <summary>
+        /// Calculate the lanch angle.
+        /// </summary>
+        /// <param name="launchOrigin">The start position of the launched projectile.</param>
+        /// <param name="launchTarget">The target position for the projectile to hit.</param>
+        /// <param name="launchSpeed">The speed at which to launch the projectile.</param>
+        /// <param name="angle">The calculated angle of trajectory.</param>
+        /// <param name="isHighAngle">Whether to calculate the high angle rather than the low angle (since there are two possible trajectories).</param>
+        /// <returns>The angle for the projectile to be launched at.</returns>
+        private static bool CalculateTrajectoryAngle(Vector3 launchOrigin, Vector3 launchTarget, float launchSpeed, out float angle, bool isHighAngle)
+        {
+            Vector3 dir = launchTarget - launchOrigin;
+            float vSqr = launchSpeed * launchSpeed;
+            float y = dir.y;
+
+            dir.y = 0.0f;
+            float x = dir.sqrMagnitude;
+
+            float g = -Physics.gravity.y;
+
+            float uRoot = vSqr * vSqr - g * (g * (x) + (2.0f * y * vSqr));
+
+            if (uRoot < 0.0f)
+            {
+                angle = -45.0f;
+                return false;
+            }
+
+            float r = Mathf.Sqrt(uRoot);
+            float bottom = g * Mathf.Sqrt(x);
+
+            angle = isHighAngle ? -(Mathf.Atan2(vSqr + r, bottom) * Mathf.Rad2Deg) : -(Mathf.Atan2(vSqr - r, bottom) * Mathf.Rad2Deg);
+            return true;
+
         }
 
         private static Vector3[] ThinOutPath(Vector3[] path, int thinFactor = 15)

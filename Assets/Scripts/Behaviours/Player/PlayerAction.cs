@@ -139,12 +139,12 @@ namespace Game.Behaviours.Player
 
         private void InitialisePickupThrowBehaviour()
         {
-            arcLineRenderer = GetComponent<LineRenderer>();
-
             UserInputManager.Instance.OnPrimaryMouseDown += Aim;
             UserInputManager.Instance.OnPrimaryMouseUp += Throw;
             UserInputManager.Instance.OnSecondaryMouseDown += CancelAim;
 
+            arcLineRenderer = GetComponent<LineRenderer>();
+            arcTargetInstance = Instantiate(arcTargetPrefab, transform).transform;
             SetArcActive(false);
         }
 
@@ -236,22 +236,23 @@ namespace Game.Behaviours.Player
         private const float ARC_SEGMENT_INTERVAL = 0.005f;
         private const float ARC_MAX_SIMULATION_TIME = 8f;
 
-        [SerializeField] private Transform arcTarget;
+        [SerializeField] private GameObject arcTargetPrefab;
+        private Transform arcTargetInstance;
 
         private LineRenderer arcLineRenderer;
         private Ballistics.LaunchPathInfo? launchPathInfo = null;
         private Coroutine calcAndDrawLaunchPathRoutine;
 
-        public float ThrowSpeed { get; set; } = 12;
+        public float MaxThrowSpeed { get; set; } = 12;
 
         [ServerRpc]
-        private void RequestThrowServerRpc(Quaternion launchDir)
+        private void RequestThrowServerRpc(Quaternion launchDir, float throwSpeed)
         {
             if (ItemDatabase.Instance.GetItemByID(heldObject.ItemID, out Item itemData))
             {
                 Transform projectile = Instantiate(itemData.PickupPrefab, HoldingPosition, Quaternion.identity).transform;
                 projectile.GetComponent<NetworkObject>().Spawn();
-                projectile.GetComponent<Rigidbody>().velocity = launchDir * Vector3.forward * ThrowSpeed;
+                projectile.GetComponent<Rigidbody>().velocity = launchDir * Vector3.forward * Mathf.Clamp(throwSpeed, 0, MaxThrowSpeed);
                 GrantThrowClientRpc();
             }
         }
@@ -289,7 +290,7 @@ namespace Game.Behaviours.Player
             {
                 if (launchPathInfo.HasValue)
                 {
-                    RequestThrowServerRpc(launchPathInfo.Value.launchDir);
+                    RequestThrowServerRpc(launchPathInfo.Value.launchDir, 12);
                     launchPathInfo = null;
                 }
                 else
@@ -314,19 +315,23 @@ namespace Game.Behaviours.Player
             while (IsInState(State.Aiming))
             {
                 Vector3 mouseWorldPoint = Raycasting.CalculateMousePlaneInstersect(Mouse.current.position.ReadValue(), Vector3.zero, Vector3.back);
-                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, mouseWorldPoint, ThrowSpeed, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
+                Vector3 throwDir = (mouseWorldPoint - HoldingPosition).normalized;
+                launchPathInfo = Ballistics.GenerateComplexTrajectoryPath(HoldingPosition, throwDir, 12, ARC_SEGMENT_INTERVAL, ARC_MAX_SIMULATION_TIME);
 
                 if (launchPathInfo.HasValue)
                 {
                     SetArcActive(true);
-
                     arcLineRenderer.positionCount = launchPathInfo.Value.launchPath.Length;
                     arcLineRenderer.SetPositions(launchPathInfo.Value.launchPath);
 
                     if (launchPathInfo.Value.hit.HasValue)
                     {
-                        arcTarget.position = launchPathInfo.Value.hit.Value.point;
-                        arcTarget.LookAt(arcTarget.position + launchPathInfo.Value.hit.Value.normal);
+                        arcTargetInstance.position = launchPathInfo.Value.hit.Value.point + Vector3.up * 0.05f;
+                        arcTargetInstance.LookAt(arcTargetInstance.position + launchPathInfo.Value.hit.Value.normal);
+                    }
+                    else
+                    {
+                        arcTargetInstance.gameObject.SetActive(false);
                     }
                 }
                 else
@@ -344,7 +349,7 @@ namespace Game.Behaviours.Player
         private void SetArcActive(bool isActive)
         {
             arcLineRenderer.enabled = isActive;
-            arcTarget.gameObject.SetActive(isActive);
+            arcTargetInstance.gameObject.SetActive(isActive);
         }
 
         #endregion
