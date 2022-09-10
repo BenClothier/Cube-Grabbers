@@ -57,19 +57,23 @@ namespace Game.DataAssets
         public class MeshConfiguration
         {
             [SerializeField] private NeighbourState N;
-            [SerializeField] private NeighbourState NE;
+            [SerializeField] private NeighbourState NE = NeighbourState.Irrelevant;
             [SerializeField] private NeighbourState E;
-            [SerializeField] private NeighbourState SE;
+            [SerializeField] private NeighbourState SE = NeighbourState.Irrelevant;
             [SerializeField] private NeighbourState S;
-            [SerializeField] private NeighbourState SW;
+            [SerializeField] private NeighbourState SW = NeighbourState.Irrelevant;
             [SerializeField] private NeighbourState W;
-            [SerializeField] private NeighbourState NW;
+            [SerializeField] private NeighbourState NW = NeighbourState.Irrelevant;
             [Space]
-            [SerializeField] MeshFace[] meshes;
+            [SerializeField] private bool canRotate = true;
+            [Space]
+            [SerializeField] private MeshFace[] meshes;
 
             public NeighbourState[] Configuration => new NeighbourState[] { N, NE, E, SE, S, SW, W, NW };
 
             public MeshFace[] Meshes => meshes;
+
+            public bool CanRotate => canRotate;
         }
 
         [Serializable]

@@ -6,6 +6,7 @@ namespace Game.Components
     using UnityEngine;
     using Unity.VisualScripting;
 
+    [RequireComponent(typeof(Grid))]
     public class WorldGrid : MonoBehaviour
     {
         private static readonly Vector2Int[] DIRECTION_VECTORS =
@@ -34,13 +35,8 @@ namespace Game.Components
 
         private static readonly int DIRECTION_COUNT = Enum.GetValues(typeof(Direction)).Length;
 
-        [SerializeField] private float cellRadius;
-        [Space]
-        [SerializeField] private Vector3 gridOrigin;
         [SerializeField] private Vector2Int gridFillMin;
         [SerializeField] private Vector2Int gridFillMax;
-        [SerializeField] private Vector2Int backGridFillMin;
-        [SerializeField] private Vector2Int backGridFillMax;
 
         private Dictionary<Vector2Int, WorldCell> worldCells = new ();
         private HashSet<Vector2Int> dirtyCells = new ();
@@ -168,6 +164,11 @@ namespace Game.Components
             dirtyCells.Clear();
         }
 
+        private void Awake()
+        {
+            Grid = GetComponent<Grid>();
+        }
+
         private void UpdateCell(Vector2Int loc)
         {
             if (CellIsPresent(loc))
@@ -198,19 +199,6 @@ namespace Game.Components
             }
 
             UpdateDirtyCells();
-        }
-
-        private void OnValidate()
-        {
-            if (Grid is null)
-            {
-                gameObject.AddComponent<Grid>();
-            }
-
-            Grid.cellSize = Vector2.one * cellRadius;
-            Grid.cellGap = Vector3.zero;
-            Grid.cellLayout = GridLayout.CellLayout.Rectangle;
-            Grid.cellSwizzle = GridLayout.CellSwizzle.XYZ;
         }
 
         public struct WorldCell

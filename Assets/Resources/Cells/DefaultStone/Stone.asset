@@ -17,7 +17,7 @@ MonoBehaviour:
   - ItemID: 0
     dropChance: 1
   - ItemID: 0
-    dropChance: 0.4
+    dropChance: 0.1
   - ItemID: 1
     dropChance: 0.1
   meshConfigurations:
@@ -29,8 +29,9 @@ MonoBehaviour:
     SW: 2
     W: 0
     NW: 2
+    canRotate: 1
     meshes: []
-  - N: 0
+  - N: 1
     NE: 2
     E: 0
     SE: 2
@@ -38,13 +39,75 @@ MonoBehaviour:
     SW: 2
     W: 0
     NW: 2
-    meshes: []
-  - N: 0
-    NE: 0
-    E: 0
-    SE: 0
+    canRotate: 1
+    meshes:
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 0
+      Flip: 0
+  - N: 1
+    NE: 2
+    E: 1
+    SE: 2
     S: 0
-    SW: 0
+    SW: 2
     W: 0
-    NW: 0
-    meshes: []
+    NW: 2
+    canRotate: 1
+    meshes:
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 0
+      Flip: 0
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 1
+      Flip: 0
+  - N: 1
+    NE: 2
+    E: 1
+    SE: 2
+    S: 1
+    SW: 2
+    W: 0
+    NW: 2
+    canRotate: 1
+    meshes:
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 0
+      Flip: 0
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 1
+      Flip: 0
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 2
+      Flip: 0
+  - N: 1
+    NE: 2
+    E: 1
+    SE: 2
+    S: 1
+    SW: 2
+    W: 1
+    NW: 2
+    canRotate: 1
+    meshes:
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 0
+      Flip: 0
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 1
+      Flip: 0
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 2
+      Flip: 0
+    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+        type: 3}
+      Direction: 3
+      Flip: 0
