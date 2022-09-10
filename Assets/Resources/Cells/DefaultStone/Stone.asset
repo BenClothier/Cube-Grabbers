@@ -21,16 +21,6 @@ MonoBehaviour:
   - ItemID: 1
     dropChance: 0.1
   meshConfigurations:
-  - N: 0
-    NE: 2
-    E: 0
-    SE: 2
-    S: 0
-    SW: 2
-    W: 0
-    NW: 2
-    canRotate: 1
-    meshes: []
   - N: 1
     NE: 2
     E: 0
@@ -40,11 +30,11 @@ MonoBehaviour:
     W: 0
     NW: 2
     canRotate: 1
-    meshes:
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 0
-      Flip: 0
+    Face_N: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_E: {fileID: 0}
+    Face_S: {fileID: 0}
+    Face_W: {fileID: 0}
   - N: 1
     NE: 2
     E: 1
@@ -54,15 +44,12 @@ MonoBehaviour:
     W: 0
     NW: 2
     canRotate: 1
-    meshes:
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 0
-      Flip: 0
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 1
-      Flip: 0
+    Face_N: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_E: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_S: {fileID: 0}
+    Face_W: {fileID: 0}
   - N: 1
     NE: 2
     E: 1
@@ -72,19 +59,13 @@ MonoBehaviour:
     W: 0
     NW: 2
     canRotate: 1
-    meshes:
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 0
-      Flip: 0
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 1
-      Flip: 0
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 2
-      Flip: 0
+    Face_N: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_E: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_S: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_W: {fileID: 0}
   - N: 1
     NE: 2
     E: 1
@@ -94,20 +75,11 @@ MonoBehaviour:
     W: 1
     NW: 2
     canRotate: 1
-    meshes:
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 0
-      Flip: 0
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 1
-      Flip: 0
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 2
-      Flip: 0
-    - Mesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
-        type: 3}
-      Direction: 3
-      Flip: 0
+    Face_N: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_E: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_S: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_W: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}

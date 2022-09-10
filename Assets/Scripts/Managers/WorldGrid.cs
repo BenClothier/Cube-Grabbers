@@ -5,6 +5,8 @@ namespace Game.Components
     using System.Collections.Generic;
     using UnityEngine;
     using Unity.VisualScripting;
+    using Game.Managers;
+    using Game.DataAssets;
 
     [RequireComponent(typeof(Grid))]
     public class WorldGrid : MonoBehaviour
@@ -171,13 +173,30 @@ namespace Game.Components
 
         private void UpdateCell(Vector2Int loc)
         {
-            if (CellIsPresent(loc))
+            if (TryGetCell(loc, out WorldCell cell))
             {
-                bool[] neighbourPresence = GetNeighbours(loc)
-                    .Select(c => c.HasValue)
-                    .ToArray();
+                if (BlockDatabase.Instance.TryGetBlockByID(cell.BlockID, out Block block))
+                {
+                    if (block.TryGetMeshes(GetNeighbours(loc).Select(c => c.HasValue).ToArray(), out Mesh[] meshes))
+                    {
+                        GameObject cellGO = Instantiate(new GameObject($"Cell[{loc}]"), GetWorldPosFromGridLoc(loc), Quaternion.identity, transform);
 
-                // UPDATE MESH
+                        for (int i = 0; i < meshes.Length; i++)
+                        {
+                            MeshFilter mf = Instantiate(new GameObject($"face"), cellGO.transform)
+                                .AddComponent<MeshRenderer>()
+                                .AddComponent<MeshFilter>();
+
+                            mf.mesh = meshes[i];
+                            Vector2Int dir = DIRECTION_VECTORS[i];
+                            mf.transform.LookAt(mf.transform.position + new Vector3(dir.x, dir.y));
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Now block was found with ID [{cell.BlockID}]");
+                }
             }
         }
 

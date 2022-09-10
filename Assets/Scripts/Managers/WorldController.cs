@@ -26,7 +26,7 @@ namespace Game.Managers
             {
                 if (worldGrid.TryGetCell(gridLoc, out WorldGrid.WorldCell cell))
                 {
-                    if (BlockDatabase.Instance.GetCellByID(cell.BlockID, out Block block))
+                    if (BlockDatabase.Instance.TryGetBlockByID(cell.BlockID, out Block block))
                     {
                         int[] itemsToSpawn = block.GenerateDrops();
 

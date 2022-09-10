@@ -8,11 +8,11 @@ namespace Game.Managers
 
     public class BlockDatabase : Singleton<BlockDatabase>
     {
-        private Dictionary<int, Block> cellDictionary = new ();
+        private Dictionary<int, Block> blockDictionary = new ();
 
-        public bool GetCellByID(int id, out Block cell)
+        public bool TryGetBlockByID(int id, out Block block)
         {
-            if (cellDictionary.TryGetValue(id, out cell))
+            if (blockDictionary.TryGetValue(id, out block))
             {
                 return true;
             }
@@ -34,7 +34,7 @@ namespace Game.Managers
 
             foreach (Block cell in cellList)
             {
-                cellDictionary.Add(cell.ID, cell);
+                blockDictionary.Add(cell.ID, cell);
             }
         }
     }
