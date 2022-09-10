@@ -20,7 +20,31 @@ MonoBehaviour:
     dropChance: 0.4
   - ItemID: 1
     dropChance: 0.1
-  cellPrefab: {fileID: 8000072700634934139, guid: 7a09d355f0157654cb94d0a64b856fd5,
-    type: 3}
-  mineableCellPrefab: {fileID: 6753801058835408217, guid: 8047cbf2ea102734da39630d09bb8cd4,
-    type: 3}
+  meshConfigurations:
+  - N: 0
+    NE: 2
+    E: 0
+    SE: 2
+    S: 0
+    SW: 2
+    W: 0
+    NW: 2
+    meshes: []
+  - N: 0
+    NE: 2
+    E: 0
+    SE: 2
+    S: 0
+    SW: 2
+    W: 0
+    NW: 2
+    meshes: []
+  - N: 0
+    NE: 0
+    E: 0
+    SE: 0
+    S: 0
+    SW: 0
+    W: 0
+    NW: 0
+    meshes: []

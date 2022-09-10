@@ -121,9 +121,11 @@ namespace Game.Behaviours.Player
 
         private void OnPrimaryMouseDown(InputAction.CallbackContext context)
         {
-            if (IsInState(State.Idle) && Raycasting.CalculateMouseWorldIntersect(UserInputManager.Instance.MousePos, out RaycastHit hitInfo, new string[] { "Mineable" }))
+            if (IsInState(State.Idle))
             {
-                RequestMineCellServerRpc(WorldController.Instance.GetCellPosFromWorldPos(hitInfo.collider.transform.position));
+                RequestMineCellServerRpc(
+                    WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(
+                        Raycasting.CalculateMousePlaneInstersect(UserInputManager.Instance.MousePos, Vector3.forward * 2, Vector3.forward)));
             }
         }
 

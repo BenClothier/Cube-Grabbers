@@ -6,11 +6,11 @@ namespace Game.Managers
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class CellDatabase : Singleton<CellDatabase>
+    public class BlockDatabase : Singleton<BlockDatabase>
     {
-        private Dictionary<int, Cell> cellDictionary = new ();
+        private Dictionary<int, Block> cellDictionary = new ();
 
-        public bool GetCellByID(int id, out Cell cell)
+        public bool GetCellByID(int id, out Block cell)
         {
             if (cellDictionary.TryGetValue(id, out cell))
             {
@@ -30,9 +30,9 @@ namespace Game.Managers
 
         private void InitialiseDatabase()
         {
-            Cell[] cellList = Resources.LoadAll<Cell>("Cells");
+            Block[] cellList = Resources.LoadAll<Block>("Cells");
 
-            foreach (Cell cell in cellList)
+            foreach (Block cell in cellList)
             {
                 cellDictionary.Add(cell.ID, cell);
             }
