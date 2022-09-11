@@ -172,21 +172,22 @@ namespace Game.Components
                 {
                     if (block.TryGetMeshes(GetNeighbourPattern(loc), out Mesh[] meshes))
                     {
-                        GameObject cellGO = Instantiate(new GameObject($"Cell[{loc}]"), GetWorldPosFromGridLoc(loc), Quaternion.identity, transform);
+                        Transform cellTransform = new GameObject($"Cell[{loc}]").transform;
+                        cellTransform.position = GetWorldPosFromGridLoc(loc);
+                        cellTransform.parent = transform;
 
                         for (int i = 0; i < meshes.Length; i++)
                         {
                             Mesh mesh = meshes[i];
                             if (mesh != null)
                             {
-                                MeshFilter mf = Instantiate(new GameObject($"face"), cellGO.transform).AddComponent<MeshFilter>();
+                                Transform face = new GameObject($"face", typeof(MeshFilter), typeof(MeshRenderer)).transform;
 
-                                mf.mesh = mesh;
-                                mf.transform.RotateAround(mf.transform.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
-
-                                MeshRenderer mr = mf.AddComponent<MeshRenderer>();
-
-                                mr.material = block.Material;
+                                face.parent = cellTransform;
+                                face.localPosition = Vector3.zero;
+                                face.RotateAround(face.transform.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
+                                face.GetComponent<MeshFilter>().mesh = mesh;
+                                face.GetComponent<MeshRenderer>().material = block.Material;
                             }
                         }
                     }
