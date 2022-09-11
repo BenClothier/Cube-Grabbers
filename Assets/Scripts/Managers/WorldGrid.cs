@@ -1,12 +1,13 @@
 namespace Game.Components
 {
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using Unity.VisualScripting;
     using Game.Managers;
     using Game.DataAssets;
+
+    using System;
+    using System.Linq;
+    using UnityEngine;
+    using Unity.VisualScripting;
+    using System.Collections.Generic;
 
     [RequireComponent(typeof(Grid))]
     public class WorldGrid : MonoBehaviour
@@ -28,7 +29,12 @@ namespace Game.Components
         [SerializeField] private Vector2Int gridFillMin;
         [SerializeField] private Vector2Int gridFillMax;
 
-        private Dictionary<Vector2Int, WorldCell> worldCells = new ();
+        private Dictionary<Vector2Int, int?> worldCells = new ();
+        private Dictionary<Vector2Int, GameObject> worldBlocks = new();
+
+        /// <summary>
+        /// Cell positions that have been changed in the 'worldCells' dictionary but have not had their meshes updated in the 'worldBlocks' dictionary.
+        /// </summary>
         private HashSet<Vector2Int> dirtyCells = new ();
 
         [Flags]
@@ -77,7 +83,7 @@ namespace Game.Components
         /// <param name="id">Block ID.</param>
         public void AddCell(Vector2Int loc, int id)
         {
-            worldCells.Add(loc, new WorldCell(id));
+            worldCells.Add(loc, id);
 
             // Set this and all neighbouring cells as 'dirty'
             dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc));
@@ -100,10 +106,13 @@ namespace Game.Components
         /// <param name="loc">Location.</param>
         public void RemoveCell(Vector2Int loc)
         {
-            worldCells.Remove(loc);
+            if (worldCells.TryGetValue(loc, out int? blockID))
+            {
+                worldCells.Remove(loc);
 
-            // Set all neighbouring cells as 'dirty'
-            dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc));
+                // Set this and all neighbouring cells as 'dirty'
+                dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc));
+            }
         }
 
         /// <summary>
@@ -117,21 +126,11 @@ namespace Game.Components
         }
 
         /// <summary>
-        /// Gets the cell at the given grid location, if one is present.
-        /// </summary>
-        /// <param name="loc">Location.</param>
-        /// <returns>The cell if one exists, otherwise null.</returns>
-        public WorldCell? GetCell(Vector2Int loc)
-        {
-            return worldCells.TryGetValue(loc, out WorldCell cell) ? cell : null;
-        }
-
-        /// <summary>
         /// Tries to get the cell at the given grid location, if one is present.
         /// </summary>
         /// <param name="loc">Location.</param>
         /// <returns>True if a cell was found.</returns>
-        public bool TryGetCell(Vector2Int loc, out WorldCell cell)
+        public bool TryGetCell(Vector2Int loc, out int? cell)
         {
             return worldCells.TryGetValue(loc, out cell);
         }
@@ -164,38 +163,64 @@ namespace Game.Components
             Grid = GetComponent<Grid>();
         }
 
+        /// <summary>
+        /// Add or remove meshes for the cell at the given position.
+        /// </summary>
+        /// <param name="loc">The grid location of the cell.</param>
         private void UpdateCell(Vector2Int loc)
         {
-            if (TryGetCell(loc, out WorldCell cell))
+            // Remove existing block at the location if one exists
+            RemoveBlock(loc);
+
+            // If their exists a cell entry for this location
+            if (TryGetCell(loc, out int? cell))
             {
-                if (BlockDatabase.Instance.TryGetBlockByID(cell.BlockID, out Block block))
+                // Get the block-information associated with the id of the entry
+                if (BlockDatabase.Instance.TryGetBlockByID(cell.Value, out Block block))
                 {
+                    // Try to match the cell's neighbour pattern with one of the defined patterns to get the required meshes
                     if (block.TryGetMeshes(GetNeighbourPattern(loc), out Mesh[] meshes))
                     {
-                        Transform cellTransform = new GameObject($"Cell[{loc}]").transform;
-                        cellTransform.position = GetWorldPosFromGridLoc(loc);
-                        cellTransform.parent = transform;
+                        // Create a parent object for the block
+                        Transform blockParent = new GameObject($"Cell[{loc}]").transform;
+                        blockParent.position = GetWorldPosFromGridLoc(loc);
+                        blockParent.parent = transform;
 
+                        // For each mesh given by the pattern, create a face object to render the mesh
                         for (int i = 0; i < meshes.Length; i++)
                         {
                             Mesh mesh = meshes[i];
+
                             if (mesh != null)
                             {
-                                Transform face = new GameObject($"face", typeof(MeshFilter), typeof(MeshRenderer)).transform;
+                                Transform face = new GameObject($"face", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
 
-                                face.parent = cellTransform;
+                                face.parent = blockParent;
                                 face.localPosition = Vector3.zero;
                                 face.RotateAround(face.transform.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
                                 face.GetComponent<MeshFilter>().mesh = mesh;
                                 face.GetComponent<MeshRenderer>().material = block.Material;
+                                face.GetComponent<MeshCollider>().sharedMesh = mesh;
                             }
                         }
+
+                        // Update the 'worldBlocks' dictionary
+                        worldBlocks.Add(loc, blockParent.gameObject);
                     }
                 }
                 else
                 {
-                    Debug.LogError($"Now block was found with ID [{cell.BlockID}]");
+                    Debug.LogError($"Now block was found with ID [{cell.Value}]");
                 }
+            }
+        }
+
+        private void RemoveBlock(Vector2Int loc)
+        {
+            if (worldBlocks.TryGetValue(loc, out GameObject block))
+            {
+                worldBlocks.Remove(loc);
+                Destroy(block);
             }
         }
 
@@ -215,13 +240,6 @@ namespace Game.Components
             return pattern;
         }
 
-        private WorldCell?[] GetNeighbours(Vector2Int loc)
-        {
-            return DIRECTION_VECTORS.Values
-                .Select(dir => GetCell(dir + loc))
-                .ToArray();
-        }
-
         public void Initialise()
         {
             for (int x = gridFillMin.x; x <= gridFillMax.x; x++)
@@ -233,18 +251,6 @@ namespace Game.Components
             }
 
             UpdateDirtyCells();
-        }
-
-        public struct WorldCell
-        {
-            public int BlockID;
-            public Mesh[] Meshes;
-
-            public WorldCell(int id)
-            {
-                BlockID = id;
-                Meshes = null;
-            }
         }
     }
 }

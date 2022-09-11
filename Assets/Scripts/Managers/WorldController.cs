@@ -1,7 +1,6 @@
 namespace Game.Managers
 {
     using Game.DataAssets;
-    using Game.Behaviours;
     using Game.Components;
     using Game.Utility.Networking;
 
@@ -24,9 +23,9 @@ namespace Game.Managers
         {
             if (IsServer)
             {
-                if (worldGrid.TryGetCell(gridLoc, out WorldGrid.WorldCell cell))
+                if (worldGrid.TryGetCell(gridLoc, out int? cell))
                 {
-                    if (BlockDatabase.Instance.TryGetBlockByID(cell.BlockID, out Block block))
+                    if (BlockDatabase.Instance.TryGetBlockByID(cell.Value, out Block block))
                     {
                         int[] itemsToSpawn = block.GenerateDrops();
 
@@ -44,7 +43,7 @@ namespace Game.Managers
                     }
                     else
                     {
-                        Debug.LogError($"Could not find block information with ID [{cell.BlockID}]");
+                        Debug.LogError($"Could not find block information with ID [{cell.Value}]");
                     }
                 }
                 else

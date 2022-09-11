@@ -84,3 +84,18 @@ MonoBehaviour:
       type: 3}
     Face_W: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
       type: 3}
+  - N: 1
+    NE: 2
+    E: 0
+    SE: 2
+    S: 1
+    SW: 2
+    W: 0
+    NW: 2
+    canRotate: 1
+    Face_N: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_E: {fileID: 0}
+    Face_S: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+    Face_W: {fileID: 0}
