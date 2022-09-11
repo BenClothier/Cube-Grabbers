@@ -8,6 +8,7 @@ namespace Game.Components
     using UnityEngine;
     using Unity.VisualScripting;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
 
     [RequireComponent(typeof(Grid))]
     public class WorldGrid : MonoBehaviour
@@ -24,13 +25,14 @@ namespace Game.Components
             { NeighbourDir.NW, Vector2Int.up + Vector2Int.left},
         };
 
-        private static readonly int DIRECTION_COUNT = Enum.GetValues(typeof(NeighbourDir)).Length;
-
         [SerializeField] private Vector2Int gridFillMin;
         [SerializeField] private Vector2Int gridFillMax;
 
         private Dictionary<Vector2Int, int?> worldCells = new ();
-        private Dictionary<Vector2Int, GameObject> worldBlocks = new();
+
+        public delegate void OnPushGridUpdateAction(Vector2Int[] modifiedCells);
+
+        public event OnPushGridUpdateAction OnPushGridUpdate;
 
         /// <summary>
         /// Cell positions that have been changed in the 'worldCells' dictionary but have not had their meshes updated in the 'worldBlocks' dictionary.
@@ -86,7 +88,7 @@ namespace Game.Components
             worldCells.Add(loc, id);
 
             // Set this and all neighbouring cells as 'dirty'
-            dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc));
+            dirtyCells.AddRange(GetNeighbourLocations(loc, true));
         }
 
         /// <summary>
@@ -106,12 +108,12 @@ namespace Game.Components
         /// <param name="loc">Location.</param>
         public void RemoveCell(Vector2Int loc)
         {
-            if (worldCells.TryGetValue(loc, out int? blockID))
+            if (worldCells.TryGetValue(loc, out int? id))
             {
                 worldCells.Remove(loc);
 
                 // Set this and all neighbouring cells as 'dirty'
-                dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc));
+                dirtyCells.AddRange(GetNeighbourLocations(loc, true));
             }
         }
 
@@ -150,24 +152,89 @@ namespace Game.Components
         /// </summary>
         public void UpdateDirtyCells()
         {
-            foreach (Vector2Int loc in dirtyCells)
+            OnPushGridUpdate?.Invoke(dirtyCells.ToArray());
+            dirtyCells.Clear();
+        }
+
+        
+        public Vector2Int[] GetNeighbourLocations(Vector2Int loc, bool includeThisLocation = false, bool clampToWorldBounds = true)
+        {
+            IEnumerable<Vector2Int> neighbourLcoations;
+
+            if (includeThisLocation)
             {
-                UpdateCell(loc);
+                neighbourLcoations = DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc);
+            }
+            else
+            {
+                neighbourLcoations = DIRECTION_VECTORS.Values.Select(dir => dir + loc);
             }
 
-            dirtyCells.Clear();
+            if (!clampToWorldBounds)
+            {
+                return neighbourLcoations.ToArray();
+            }
+
+            return neighbourLcoations.Where(loc => loc.x >= gridFillMin.x && loc.y >= gridFillMin.y && loc.x <= gridFillMax.x && loc.y <= gridFillMax.y).ToArray();
+        }
+
+        /// <summary>
+        /// Gets the neighbour pattern around the provided grid location (e.g. "11001000" if has neighbours N, NE, and S).
+        /// </summary>
+        /// <param name="loc">The grid location.</param>
+        /// <returns>What neighbours this grid location has in binary form.</returns>
+        public byte GetNeighbourPattern(Vector2Int loc)
+        {
+            byte pattern = 0;
+
+            for (NeighbourDir dir = NeighbourDir.N; dir <= NeighbourDir.NW; dir = (NeighbourDir)((byte)dir << 1))
+            {
+                if (CellIsPresent(loc + DIRECTION_VECTORS[dir]))
+                {
+                    pattern |= (byte)dir;
+                }
+            }
+
+            return pattern;
+        }
+
+        public void Initialise()
+        {
+            for (int x = gridFillMin.x; x <= gridFillMax.x; x++)
+            {
+                for (int y = gridFillMin.y; y <= gridFillMax.y; y++)
+                {
+                    AddCell(new Vector2Int(x, y), 0);
+                }
+            }
+
+            UpdateDirtyCells();
         }
 
         private void Awake()
         {
             Grid = GetComponent<Grid>();
+            OnPushGridUpdate += RenderMainGrid;
+            OnPushGridUpdate += RenderBackground;
+        }
+
+        #region Render Main Grid
+
+        private Dictionary<Vector2Int, GameObject> worldBlocks = new();
+
+        private void RenderMainGrid(Vector2Int[] cellsToRerender)
+        {
+            foreach (Vector2Int loc in cellsToRerender)
+            {
+                RerenderBlock(loc);
+            }
         }
 
         /// <summary>
         /// Add or remove meshes for the cell at the given position.
         /// </summary>
         /// <param name="loc">The grid location of the cell.</param>
-        private void UpdateCell(Vector2Int loc)
+        private void RerenderBlock(Vector2Int loc)
         {
             // Remove existing block at the location if one exists
             RemoveBlock(loc);
@@ -193,11 +260,11 @@ namespace Game.Components
 
                             if (mesh != null)
                             {
-                                Transform face = new GameObject($"face", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
+                                Transform face = new GameObject($"Face", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
 
                                 face.parent = blockParent;
-                                face.localPosition = Vector3.zero;
-                                face.RotateAround(face.transform.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
+                                face.localPosition = Vector3.up;
+                                face.RotateAround(blockParent.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
                                 face.GetComponent<MeshFilter>().mesh = mesh;
                                 face.GetComponent<MeshRenderer>().material = block.Material;
                                 face.GetComponent<MeshCollider>().sharedMesh = mesh;
@@ -224,33 +291,55 @@ namespace Game.Components
             }
         }
 
-        private byte GetNeighbourPattern(Vector2Int loc)
+        #endregion
+
+        #region Render Background
+
+        [SerializeField] private Mesh backgroundPanelMesh;
+        private Dictionary<Vector2Int, GameObject> backgroundPanels = new ();
+
+        private void RenderBackground(Vector2Int[] cellsToRerender)
         {
-            byte pattern = 0;
-
-            for (NeighbourDir dir = NeighbourDir.N; dir <= NeighbourDir.NW; dir = (NeighbourDir)((byte)dir << 1))
+            foreach (Vector2Int loc in cellsToRerender)
             {
-                if (CellIsPresent(loc + DIRECTION_VECTORS[dir]))
-                {
-                    pattern |= (byte)dir;
-                }
+                RerenderPanel(loc);
             }
-
-            Debug.Log($"loc[{loc}] has neighbours: {pattern}");
-            return pattern;
         }
 
-        public void Initialise()
+        private void RerenderPanel(Vector2Int loc)
         {
-            for (int x = gridFillMin.x; x <= gridFillMax.x; x++)
+            RemovePanel(loc);
+
+            if (!CellIsPresent(loc))
             {
-                for (int y = gridFillMin.y; y <= gridFillMax.y; y++)
+                if (BlockDatabase.Instance.TryGetBlockByID(0, out Block block))
                 {
-                    AddCell(new Vector2Int(x, y), 0);
+                    Transform face = new GameObject($"BackPanel", typeof(MeshFilter), typeof(MeshRenderer)).transform;
+
+                    face.parent = transform;
+                    face.position = (Vector3)GetWorldPosFromGridLoc(loc) - Vector3.back;
+                    face.RotateAround(face.transform.position, Vector3.right, -90);
+                    face.GetComponent<MeshFilter>().mesh = backgroundPanelMesh;
+                    face.GetComponent<MeshRenderer>().material = block.Material;
+
+                    backgroundPanels.Add(loc, face.gameObject);
+                }
+                else
+                {
+                    Debug.LogError($"Now block was found with ID [{0}]");
                 }
             }
-
-            UpdateDirtyCells();
         }
+
+        private void RemovePanel(Vector2Int loc)
+        {
+            if (backgroundPanels.TryGetValue(loc, out GameObject panel))
+            {
+                backgroundPanels.Remove(loc);
+                Destroy(panel);
+            }
+        }
+
+        #endregion
     }
 }

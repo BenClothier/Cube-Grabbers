@@ -211,14 +211,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
-  m_LocalRotation: {x: 0.32139382, y: 0.66341394, z: -0.38302222, w: 0.5566704}
+  m_LocalRotation: {x: 0.38302225, y: 0.55667037, z: -0.3213938, w: 0.663414}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 60, y: 100, z: 0}
+  m_LocalEulerAnglesHint: {x: 60, y: 80, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,6 +492,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridFillMin: {x: -2, y: -2}
   gridFillMax: {x: 3, y: -1}
+  backgroundPanelMesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+    type: 3}
 --- !u!1 &1453174780
 GameObject:
   m_ObjectHideFlags: 0
@@ -793,17 +795,17 @@ PrefabInstance:
     - target: {fileID: 4887777157190912699, guid: 72fd1020d1b316f40bc41c8d29b7e07d,
         type: 3}
       propertyPath: m_BackGroundColor.b
-      value: 0.9433962
+      value: 0.2264151
       objectReference: {fileID: 0}
     - target: {fileID: 4887777157190912699, guid: 72fd1020d1b316f40bc41c8d29b7e07d,
         type: 3}
       propertyPath: m_BackGroundColor.g
-      value: 0.8019788
+      value: 0.2264151
       objectReference: {fileID: 0}
     - target: {fileID: 4887777157190912699, guid: 72fd1020d1b316f40bc41c8d29b7e07d,
         type: 3}
       propertyPath: m_BackGroundColor.r
-      value: 0.7155571
+      value: 0.2264151
       objectReference: {fileID: 0}
     - target: {fileID: 4887777157869071623, guid: 72fd1020d1b316f40bc41c8d29b7e07d,
         type: 3}
