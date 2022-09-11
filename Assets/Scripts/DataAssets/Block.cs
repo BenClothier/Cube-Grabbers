@@ -4,12 +4,23 @@ namespace Game.DataAssets
     using Game.Components;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     [CreateAssetMenu(fileName = "Cell", menuName = "Game/Cell")]
     public class Block : ScriptableObject
     {
+        public static readonly float[] DIRECTION_ANGLES =
+        {
+            0,
+            -90,
+            180,
+            90,
+        };
+
         [SerializeField] private int id;
+        [SerializeField] private Material material;
+        [Space]
         [SerializeField] private ItemDropChance[] itemDropChances;
         [Space]
         [SerializeField] private MeshConfiguration[] meshConfigurations;
@@ -31,46 +42,25 @@ namespace Game.DataAssets
 
         public int ID => id;
 
-        public bool TryGetMeshes(bool[] neighbourPresence, out Mesh[] meshes)
+        public Material Material => material;
+
+        public bool TryGetMeshes(byte neighbourPattern, out Mesh[] meshes)
         {
             // Check all mesh configurations
             foreach (MeshConfiguration config in meshConfigurations)
             {
                 // If can rotate config, check all 4 rotations
-                for (int rotOffset = 0; rotOffset <= (config.CanRotate ? 6 : 0); rotOffset += 2)
+                for (int rotOffset = 0; rotOffset <= (config.CanRotate ? 4 : 0); rotOffset++)
                 {
-                    // Assume the pattern matches
-                    bool allMatch = true;
-
-                    // For each neighbour (8 total)
-                    for (int i = 0; i < neighbourPresence.Length; i++)
-                    {
-                        // Get presence of neighbour
-                        bool isCurrentNeighbourPresent = neighbourPresence[(rotOffset + i) % neighbourPresence.Length];
-
-                        // Check if it matches the config requirement
-                        bool matches = config.Configuration[i] switch
-                        {
-                            NeighbourState.Present => isCurrentNeighbourPresent,
-                            NeighbourState.Absent => !isCurrentNeighbourPresent,
-                            _ => true,
-                        };
-
-                        // If it doesn't match, we know the pattern (in this rotation) doesn't match, so don't check this rotation any further.
-                        if (!matches)
-                        {
-                            allMatch = false;
-                            break;
-                        }
-                    }
+                    byte shiftedPattern = (byte)(neighbourPattern << rotOffset * 2 | neighbourPattern >> 8 - rotOffset * 2);
 
                     // If our assumption that it matches hasn't been disproven, we have found a match, so return list of meshes accounting for the rotation offset.
-                    if (allMatch)
+                    if (config.DoesMatch(shiftedPattern))
                     {
                         meshes = new Mesh[config.Meshes.Length];
                         for (int i = 0; i < meshes.Length; i++)
                         {
-                            meshes[(i + rotOffset) % meshes.Length] = config.Meshes[i];
+                            meshes[i] = config.Meshes[(i + rotOffset) % meshes.Length];
                         }
 
                         return true;
@@ -129,6 +119,21 @@ namespace Game.DataAssets
             public Mesh[] Meshes => new Mesh[] { Face_N, Face_E, Face_S, Face_W };
 
             public bool CanRotate => canRotate;
+
+            public bool DoesMatch(byte neighbourPattern)
+            {
+                byte irrelevantMask = Configuration
+                    .Select((item, index) => new {item, index})
+                    .Aggregate((byte)0, (acc, next) => (byte)(next.item == NeighbourState.Irrelevant ? acc : acc | (1 << next.index)));
+
+                byte thisPattern = Configuration
+                    .Select((item, index) => new { item, index })
+                    .Aggregate((byte)0, (acc, next) => (byte)(next.item == NeighbourState.Present ? acc | (1 << next.index) : acc));
+
+                neighbourPattern &= irrelevantMask;
+
+                return neighbourPattern == thisPattern;
+            }
         }
 
     }

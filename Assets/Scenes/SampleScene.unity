@@ -489,8 +489,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10cbfa46eede8004ead9c90d2ca6f4ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridFillMin: {x: -9, y: -9}
-  gridFillMax: {x: 9, y: 0}
+  gridFillMin: {x: -1, y: -1}
+  gridFillMax: {x: 1, y: 1}
 --- !u!1 &1453174780
 GameObject:
   m_ObjectHideFlags: 0

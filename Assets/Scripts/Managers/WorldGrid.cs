@@ -11,31 +11,19 @@ namespace Game.Components
     [RequireComponent(typeof(Grid))]
     public class WorldGrid : MonoBehaviour
     {
-        private static readonly Vector2Int[] DIRECTION_VECTORS =
+        private static readonly Dictionary<NeighbourDir, Vector2Int> DIRECTION_VECTORS = new Dictionary<NeighbourDir, Vector2Int>
         {
-            Vector2Int.up,
-            Vector2Int.up + Vector2Int.right,
-            Vector2Int.right,
-            Vector2Int.down + Vector2Int.right,
-            Vector2Int.down,
-            Vector2Int.down + Vector2Int.left,
-            Vector2Int.left,
-            Vector2Int.up + Vector2Int.left,
+            { NeighbourDir.N, Vector2Int.up },
+            { NeighbourDir.NE, Vector2Int.up + Vector2Int.right },
+            { NeighbourDir.E, Vector2Int.right },
+            { NeighbourDir.SE, Vector2Int.down + Vector2Int.right},
+            { NeighbourDir.S, Vector2Int.down },
+            { NeighbourDir.SW, Vector2Int.down + Vector2Int.left},
+            { NeighbourDir.W, Vector2Int.left },
+            { NeighbourDir.NW, Vector2Int.up + Vector2Int.left},
         };
 
-        private static readonly Direction[] DIRECTION_OPPOSITES =
-        {
-            Direction.S,
-            Direction.SW,
-            Direction.W,
-            Direction.NW,
-            Direction.N,
-            Direction.NE,
-            Direction.E,
-            Direction.SE,
-        };
-
-        private static readonly int DIRECTION_COUNT = Enum.GetValues(typeof(Direction)).Length;
+        private static readonly int DIRECTION_COUNT = Enum.GetValues(typeof(NeighbourDir)).Length;
 
         [SerializeField] private Vector2Int gridFillMin;
         [SerializeField] private Vector2Int gridFillMax;
@@ -43,16 +31,21 @@ namespace Game.Components
         private Dictionary<Vector2Int, WorldCell> worldCells = new ();
         private HashSet<Vector2Int> dirtyCells = new ();
 
-        public enum Direction
+        [Flags]
+        public enum NeighbourDir
         {
-            N,
-            NE,
-            E,
-            SE,
-            S,
-            SW,
-            W,
-            NW,
+            None = 0b00000000,
+
+            N   = 0b00000001,
+            NE  = 0b00000010,
+            E   = 0b00000100,
+            SE  = 0b00001000,
+            S   = 0b00010000,
+            SW  = 0b00100000,
+            W   = 0b01000000,
+            NW  = 0b10000000,
+
+            All = 0b11111111,
         }
 
         public Grid Grid { get; private set; }
@@ -87,7 +80,7 @@ namespace Game.Components
             worldCells.Add(loc, new WorldCell(id));
 
             // Set this and all neighbouring cells as 'dirty'
-            dirtyCells.AddRange(DIRECTION_VECTORS.Select(dir => dir + loc).Append(loc));
+            dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc));
         }
 
         /// <summary>
@@ -110,7 +103,7 @@ namespace Game.Components
             worldCells.Remove(loc);
 
             // Set all neighbouring cells as 'dirty'
-            dirtyCells.AddRange(DIRECTION_VECTORS.Select(dir => dir + loc));
+            dirtyCells.AddRange(DIRECTION_VECTORS.Values.Select(dir => dir + loc));
         }
 
         /// <summary>
@@ -177,19 +170,24 @@ namespace Game.Components
             {
                 if (BlockDatabase.Instance.TryGetBlockByID(cell.BlockID, out Block block))
                 {
-                    if (block.TryGetMeshes(GetNeighbours(loc).Select(c => c.HasValue).ToArray(), out Mesh[] meshes))
+                    if (block.TryGetMeshes(GetNeighbourPattern(loc), out Mesh[] meshes))
                     {
                         GameObject cellGO = Instantiate(new GameObject($"Cell[{loc}]"), GetWorldPosFromGridLoc(loc), Quaternion.identity, transform);
 
                         for (int i = 0; i < meshes.Length; i++)
                         {
-                            MeshFilter mf = Instantiate(new GameObject($"face"), cellGO.transform)
-                                .AddComponent<MeshRenderer>()
-                                .AddComponent<MeshFilter>();
+                            Mesh mesh = meshes[i];
+                            if (mesh != null)
+                            {
+                                MeshFilter mf = Instantiate(new GameObject($"face"), cellGO.transform).AddComponent<MeshFilter>();
 
-                            mf.mesh = meshes[i];
-                            Vector2Int dir = DIRECTION_VECTORS[i];
-                            mf.transform.LookAt(mf.transform.position + new Vector3(dir.x, dir.y));
+                                mf.mesh = mesh;
+                                mf.transform.RotateAround(mf.transform.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
+
+                                MeshRenderer mr = mf.AddComponent<MeshRenderer>();
+
+                                mr.material = block.Material;
+                            }
                         }
                     }
                 }
@@ -200,9 +198,25 @@ namespace Game.Components
             }
         }
 
+        private byte GetNeighbourPattern(Vector2Int loc)
+        {
+            byte pattern = 0;
+
+            for (NeighbourDir dir = NeighbourDir.N; dir <= NeighbourDir.NW; dir = (NeighbourDir)((byte)dir << 1))
+            {
+                if (CellIsPresent(loc + DIRECTION_VECTORS[dir]))
+                {
+                    pattern |= (byte)dir;
+                }
+            }
+
+            Debug.Log($"loc[{loc}] has neighbours: {pattern}");
+            return pattern;
+        }
+
         private WorldCell?[] GetNeighbours(Vector2Int loc)
         {
-            return DIRECTION_VECTORS
+            return DIRECTION_VECTORS.Values
                 .Select(dir => GetCell(dir + loc))
                 .ToArray();
         }
