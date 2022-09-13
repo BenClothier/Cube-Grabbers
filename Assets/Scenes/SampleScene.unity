@@ -379,6 +379,8 @@ MonoBehaviour:
   gridFillMax: {x: 60, y: -1}
   backgroundPanelMesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
     type: 3}
+  foregroundPanelMesh: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+    type: 3}
 --- !u!1 &1453174780
 GameObject:
   m_ObjectHideFlags: 0

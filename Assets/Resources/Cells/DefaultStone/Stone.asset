@@ -36,6 +36,8 @@ MonoBehaviour:
     Face_E: {fileID: 0}
     Face_S: {fileID: 0}
     Face_W: {fileID: 0}
+    Face_Z: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
   - N: 1
     NE: 2
     E: 1
@@ -51,6 +53,8 @@ MonoBehaviour:
       type: 3}
     Face_S: {fileID: 0}
     Face_W: {fileID: 0}
+    Face_Z: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
   - N: 1
     NE: 2
     E: 1
@@ -67,6 +71,8 @@ MonoBehaviour:
     Face_S: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
       type: 3}
     Face_W: {fileID: 0}
+    Face_Z: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
   - N: 1
     NE: 2
     E: 1
@@ -84,6 +90,8 @@ MonoBehaviour:
       type: 3}
     Face_W: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
       type: 3}
+    Face_Z: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
   - N: 1
     NE: 2
     E: 0
@@ -99,3 +107,20 @@ MonoBehaviour:
     Face_S: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
       type: 3}
     Face_W: {fileID: 0}
+    Face_Z: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}
+  - N: 2
+    NE: 1
+    E: 2
+    SE: 2
+    S: 2
+    SW: 2
+    W: 2
+    NW: 2
+    canRotate: 1
+    Face_N: {fileID: 0}
+    Face_E: {fileID: 0}
+    Face_S: {fileID: 0}
+    Face_W: {fileID: 0}
+    Face_Z: {fileID: -879384806586249048, guid: 53a50ff60d2fea144b703e57a63ca886,
+      type: 3}

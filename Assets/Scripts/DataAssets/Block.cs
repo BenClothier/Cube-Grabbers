@@ -6,6 +6,7 @@ namespace Game.DataAssets
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
+    using UnityEngine.XR;
 
     [CreateAssetMenu(fileName = "Cell", menuName = "Game/Cell")]
     public class Block : ScriptableObject
@@ -23,7 +24,7 @@ namespace Game.DataAssets
         [Space]
         [SerializeField] private ItemDropChance[] itemDropChances;
         [Space]
-        [SerializeField] private MeshConfiguration[] meshConfigurations;
+        [SerializeField] private ConfigurationPattern[] meshConfigurations;
 
         public enum NeighbourState
         {
@@ -44,10 +45,10 @@ namespace Game.DataAssets
 
         public Material Material => material;
 
-        public bool TryGetMeshes(byte neighbourPattern, out Mesh[] meshes)
+        public bool TryMatchConfiguration(byte neighbourPattern, out MeshConfig meshConfig)
         {
             // Check all mesh configurations
-            foreach (MeshConfiguration config in meshConfigurations)
+            foreach (ConfigurationPattern config in meshConfigurations)
             {
                 // If can rotate config, check all 4 rotations
                 for (int rotOffset = 0; rotOffset <= (config.CanRotate ? 4 : 0); rotOffset++)
@@ -57,19 +58,14 @@ namespace Game.DataAssets
                     // If our assumption that it matches hasn't been disproven, we have found a match, so return list of meshes accounting for the rotation offset.
                     if (config.DoesMatch(shiftedPattern))
                     {
-                        meshes = new Mesh[config.Meshes.Length];
-                        for (int i = 0; i < meshes.Length; i++)
-                        {
-                            meshes[i] = config.Meshes[(i + rotOffset) % meshes.Length];
-                        }
-
+                        meshConfig = config.ConvertToMeshConfig(rotOffset);
                         return true;
                     }
                 }
             }
 
             // If no matches found in any config, return null and false - not an error, will just have no mesh.
-            meshes = null;
+            meshConfig = default;
             return false;
         }
 
@@ -96,7 +92,7 @@ namespace Game.DataAssets
         }
 
         [Serializable]
-        public class MeshConfiguration
+        public class ConfigurationPattern
         {
             [SerializeField] private NeighbourState N;
             [SerializeField] private NeighbourState NE = NeighbourState.Irrelevant;
@@ -113,26 +109,50 @@ namespace Game.DataAssets
             [SerializeField] private Mesh Face_E = null;
             [SerializeField] private Mesh Face_S = null;
             [SerializeField] private Mesh Face_W = null;
+            [SerializeField] private Mesh Face_Z = null;
 
-            public NeighbourState[] Configuration => new NeighbourState[] { N, NE, E, SE, S, SW, W, NW };
+            private NeighbourState[] configuration => new NeighbourState[] { N, NE, E, SE, S, SW, W, NW };
 
-            public Mesh[] Meshes => new Mesh[] { Face_N, Face_E, Face_S, Face_W };
+            private Mesh[] meshes => new Mesh[] { Face_N, Face_E, Face_S, Face_W };
 
             public bool CanRotate => canRotate;
 
             public bool DoesMatch(byte neighbourPattern)
             {
-                byte irrelevantMask = Configuration
+                byte irrelevantMask = configuration
                     .Select((item, index) => new {item, index})
                     .Aggregate((byte)0, (acc, next) => (byte)(next.item == NeighbourState.Irrelevant ? acc : acc | (1 << next.index)));
 
-                byte thisPattern = Configuration
+                byte thisPattern = configuration
                     .Select((item, index) => new { item, index })
                     .Aggregate((byte)0, (acc, next) => (byte)(next.item == NeighbourState.Present ? acc | (1 << next.index) : acc));
 
                 neighbourPattern &= irrelevantMask;
 
                 return neighbourPattern == thisPattern;
+            }
+
+            public MeshConfig ConvertToMeshConfig(int rotOffset)
+            {
+                Mesh[] meshList = new Mesh[meshes.Length];
+                for (int i = 0; i < meshes.Length; i++)
+                {
+                    meshList[i] = meshes[(i + rotOffset) % meshes.Length];
+                }
+
+                return new MeshConfig(meshList, Face_Z);
+            }
+        }
+
+        public struct MeshConfig
+        {
+            public Mesh[] MainMeshes;
+            public Mesh FrontMesh;
+
+            public MeshConfig(Mesh[] mainMeshes, Mesh zMesh)
+            {
+                MainMeshes = mainMeshes;
+                FrontMesh = zMesh;
             }
         }
 

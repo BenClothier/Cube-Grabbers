@@ -233,7 +233,7 @@ namespace Game.Components
         /// <summary>
         /// Add or remove meshes for the cell at the given position.
         /// </summary>
-        /// <param name="loc">The grid location of the cell.</param>
+        /// <param name="loc">The grid location of the block to rerender.</param>
         private void RerenderBlock(Vector2Int loc)
         {
             // Remove existing block at the location if one exists
@@ -246,7 +246,7 @@ namespace Game.Components
                 if (BlockDatabase.Instance.TryGetBlockByID(cell.Value, out Block block))
                 {
                     // Try to match the cell's neighbour pattern with one of the defined patterns to get the required meshes
-                    if (block.TryGetMeshes(GetNeighbourPattern(loc), out Mesh[] meshes))
+                    if (block.TryMatchConfiguration(GetNeighbourPattern(loc), out Block.MeshConfig meshConfig))
                     {
                         // Create a parent object for the block
                         Transform blockParent = new GameObject($"Cell[{loc}]").transform;
@@ -254,11 +254,11 @@ namespace Game.Components
                         blockParent.parent = transform;
 
                         // For each mesh given by the pattern, create a face object to render the mesh
-                        for (int i = 0; i < meshes.Length; i++)
+                        for (int i = 0; i < meshConfig.MainMeshes.Length; i++)
                         {
-                            Mesh mesh = meshes[i];
+                            Mesh mesh = meshConfig.MainMeshes[i];
 
-                            if (mesh != null)
+                            if (mesh is not null)
                             {
                                 Transform face = new GameObject($"Face", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
 
@@ -269,6 +269,18 @@ namespace Game.Components
                                 face.GetComponent<MeshRenderer>().material = block.Material;
                                 face.GetComponent<MeshCollider>().sharedMesh = mesh;
                             }
+                        }
+
+                        // Render the front mesh if the pattern requires it
+                        if (meshConfig.FrontMesh is not null)
+                        {
+                            Transform frontFace = new GameObject($"FrontFace", typeof(MeshFilter), typeof(MeshRenderer)).transform;
+
+                            frontFace.parent = blockParent;
+                            frontFace.localPosition = Vector3.up;
+                            frontFace.RotateAround(blockParent.position, Vector3.left, 90);
+                            frontFace.GetComponent<MeshFilter>().mesh = meshConfig.FrontMesh;
+                            frontFace.GetComponent<MeshRenderer>().material = block.Material;
                         }
 
                         // Update the 'worldBlocks' dictionary
@@ -302,13 +314,13 @@ namespace Game.Components
         {
             foreach (Vector2Int loc in cellsToRerender)
             {
-                RerenderPanel(loc);
+                RerenderBackgroundPanel(loc);
             }
         }
 
-        private void RerenderPanel(Vector2Int loc)
+        private void RerenderBackgroundPanel(Vector2Int loc)
         {
-            RemovePanel(loc);
+            RemoveBackgroundPanel(loc);
 
             if (!CellIsPresent(loc))
             {
@@ -331,7 +343,7 @@ namespace Game.Components
             }
         }
 
-        private void RemovePanel(Vector2Int loc)
+        private void RemoveBackgroundPanel(Vector2Int loc)
         {
             if (backgroundPanels.TryGetValue(loc, out GameObject panel))
             {
