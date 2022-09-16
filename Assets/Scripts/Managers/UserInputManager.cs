@@ -10,7 +10,7 @@ namespace Game.Managers
     {
         private Controls controls;
 
-        public Vector2 PlayerMovementVector { get; private set; }
+        public float PlayerMovementVector { get; private set; }
 
         public Vector2 MousePos { get; private set; }
 
@@ -62,6 +62,30 @@ namespace Game.Managers
             }
         }
 
+        public event Action<InputAction.CallbackContext> OnJumpPressed
+        {
+            add
+            {
+                controls.Default.Jump.performed += value;
+            }
+            remove
+            {
+                controls.Default.Jump.performed -= value;
+            }
+        }
+
+        public event Action<InputAction.CallbackContext> OnJumpReleased
+        {
+            add
+            {
+                controls.Default.Jump.canceled += value;
+            }
+            remove
+            {
+                controls.Default.Jump.canceled -= value;
+            }
+        }
+
         private void Awake()
         {
             controls = new Controls();
@@ -70,6 +94,7 @@ namespace Game.Managers
         private void OnEnable()
         {
             controls.Default.Move.Enable();
+            controls.Default.Jump.Enable();
             controls.Default.MousePos.Enable();
             controls.Default.PrimaryClick.Enable();
             controls.Default.SecondaryClick.Enable();
@@ -78,6 +103,7 @@ namespace Game.Managers
         private void OnDisable()
         {
             controls.Default.Move.Disable();
+            controls.Default.Jump.Disable();
             controls.Default.MousePos.Disable();
             controls.Default.PrimaryClick.Disable();
             controls.Default.SecondaryClick.Disable();
@@ -85,7 +111,7 @@ namespace Game.Managers
 
         private void FixedUpdate()
         {
-            PlayerMovementVector = controls.Default.Move.ReadValue<Vector2>();
+            PlayerMovementVector = controls.Default.Move.ReadValue<float>();
             MousePos = controls.Default.MousePos.ReadValue<Vector2>();
         }
     }
