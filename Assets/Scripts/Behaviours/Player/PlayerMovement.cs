@@ -50,9 +50,13 @@ namespace Game.Behaviours.Player
         [SerializeField] private float minJumpSpeed;
         [SerializeField] private float maxJumpSpeed;
         [SerializeField] private AnimationCurve gravityMultiplierByVerticalVelocity;
+        [SerializeField] private EventChannel_Void OnStartChargingJumpChannel;
+        [SerializeField] private EventChannel_Void OnJumpChannel;
 
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
+
+
 
         private Quaternion targetLookRotation;
         private float targetHorizontalVelocity;
@@ -273,8 +277,7 @@ namespace Game.Behaviours.Player
             if (IsInState(State.OnGround))
             {
                 MoveState(Command.StartChargingJump);
-
-                // start doing charging effects
+                OnStartChargingJumpChannel.RaiseEvent();
             }
         }
 
@@ -283,6 +286,7 @@ namespace Game.Behaviours.Player
             if (IsInState(State.ChargingJump))
             {
                 MoveState(Command.StartRising);
+                OnJumpChannel.RaiseEvent();
                 verticalVelocity = maxJumpSpeed;
             }
         }

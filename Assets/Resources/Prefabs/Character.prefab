@@ -97,6 +97,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  OnStartChargingJumpChannel: {fileID: 11400000, guid: f57a29ce2606fe14b9cb1fefb3c4d26a,
+    type: 2}
+  OnJumpChannel: {fileID: 11400000, guid: f7530b881cc720143ba263c0d1a157a7, type: 2}
   lookSpeed: 10
   debugMode: 1
 --- !u!114 &3791662118181131157
