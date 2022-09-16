@@ -381,13 +381,5 @@ namespace Game.Behaviours.Player
         }
 
         #endregion
-
-//#if UNITY_EDITOR
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(new Vector3(transform.position.x - feetWidth / 2, transform.position.y - feetOffset, 0), new Vector3(transform.position.x + feetWidth / 2, transform.position.y - feetOffset, 0));
-        }
-//#endif
     }
 }
