@@ -54,13 +54,15 @@ namespace Game.Behaviours.Player
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
 
-        private List<GameObject> currentGroundCollisions = new List<GameObject>();
-
         private Quaternion targetLookRotation;
         private float targetHorizontalVelocity;
 
         private float horizontalVelocity;
         private float verticalVelocity;
+
+        private List<GameObject> currentGroundCollisions = new List<GameObject>();
+
+        private CinemachineVirtualCamera mainVirtualCam;
 
         private bool IsOnGround => CountGroundColliders() > 0;
 
@@ -70,7 +72,8 @@ namespace Game.Behaviours.Player
 
             if (IsClient)
             {
-                FindObjectOfType<CinemachineTargetGroup>().AddMember(transform, 1, 2);
+                mainVirtualCam = FindObjectOfType<CinemachineVirtualCamera>();
+                mainVirtualCam.Follow = transform;
             }
 
             if (IsClient && IsOwner)
@@ -86,7 +89,7 @@ namespace Game.Behaviours.Player
 
             if (IsClient)
             {
-                FindObjectOfType<CinemachineTargetGroup>().RemoveMember(transform);
+                mainVirtualCam.Follow = null;
             }
 
             if (IsClient && IsOwner)
