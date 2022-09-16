@@ -59,8 +59,6 @@ namespace Game.Behaviours.Player
 
         private List<GameObject> currentGroundCollisions = new List<GameObject>();
 
-        private Rigidbody rb;
-
         private Quaternion targetLookRotation;
         private float targetHorizontalVelocity;
 
@@ -91,14 +89,12 @@ namespace Game.Behaviours.Player
 
         private void OnEnable()
         {
-            rb = GetComponent<Rigidbody>();
             UserInputManager.Instance.OnJumpPressed += OnJumpPressed;
             UserInputManager.Instance.OnJumpReleased += OnJumpReleased;
         }
 
         private void OnDisable()
         {
-            rb = GetComponent<Rigidbody>();
             UserInputManager.Instance.OnJumpPressed -= OnJumpPressed;
             UserInputManager.Instance.OnJumpReleased -= OnJumpReleased;
         }
@@ -178,17 +174,17 @@ namespace Game.Behaviours.Player
             if (IsServer)
             {
                 // Simply move the character and update the networked value for other clients to see
-                rb.MovePosition(rb.position + movement);
-                networkPosition.Value = rb.position;
+                transform.position = transform.position + movement;
+                networkPosition.Value = transform.position;
             }
             else
             {
                 // Calculate new position based on velocity
-                Vector3 newLocalPosition = rb.position + movement;
+                Vector3 newLocalPosition = transform.position + movement;
                 Vector3 newServerPosition = networkPosition.Value + movement;
 
                 // Gradually corrects to the server's position. If this is done too quickly, the user feels stutter
-                rb.MovePosition(Vector3.Lerp(newLocalPosition, newServerPosition, MOVE_SYNC_SPEED));
+                transform.position = Vector3.Lerp(newLocalPosition, newServerPosition, MOVE_SYNC_SPEED);
             }
         }
 
