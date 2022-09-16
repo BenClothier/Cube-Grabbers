@@ -36,8 +36,6 @@ namespace Game.Behaviours.Player
 
         [Header("Model")]
         [SerializeField] private GameObject model;
-        [SerializeField] private float feetOffset = 1;
-        [SerializeField] private float feetWidth = 1;
 
         [Header("Horizontal Movement")]
         [SerializeField] private float maxSpeed;
@@ -75,6 +73,12 @@ namespace Game.Behaviours.Player
             {
                 FindObjectOfType<CinemachineTargetGroup>().AddMember(transform, 1, 2);
             }
+
+            if (IsClient && IsOwner)
+            {
+                UserInputManager.Instance.OnJumpPressed += OnJumpPressed;
+                UserInputManager.Instance.OnJumpReleased += OnJumpReleased;
+            }
         }
 
         public override void OnNetworkDespawn()
@@ -85,18 +89,12 @@ namespace Game.Behaviours.Player
             {
                 FindObjectOfType<CinemachineTargetGroup>().RemoveMember(transform);
             }
-        }
 
-        private void OnEnable()
-        {
-            UserInputManager.Instance.OnJumpPressed += OnJumpPressed;
-            UserInputManager.Instance.OnJumpReleased += OnJumpReleased;
-        }
-
-        private void OnDisable()
-        {
-            UserInputManager.Instance.OnJumpPressed -= OnJumpPressed;
-            UserInputManager.Instance.OnJumpReleased -= OnJumpReleased;
+            if (IsClient && IsOwner)
+            {
+                UserInputManager.Instance.OnJumpPressed -= OnJumpPressed;
+                UserInputManager.Instance.OnJumpReleased -= OnJumpReleased;
+            }
         }
 
         private void FixedUpdate()
@@ -254,7 +252,7 @@ namespace Game.Behaviours.Player
         /// <returns>desired movement velocity of the character.</returns>
         private float CalcAndSetTargetHorizontalVelocity()
         {
-            targetHorizontalVelocity = UserInputManager.Instance.PlayerMovementVector * maxSpeed;
+            targetHorizontalVelocity = UserInputManager.Instance.PlayerMovementVector * (IsInState(State.Rising) || IsInState(State.Falling) ? inAirMaxSpeed : maxSpeed);
             return targetHorizontalVelocity;
         }
 
@@ -283,8 +281,7 @@ namespace Game.Behaviours.Player
             if (IsInState(State.ChargingJump))
             {
                 MoveState(Command.StartRising);
-
-
+                verticalVelocity = maxJumpSpeed;
             }
         }
 

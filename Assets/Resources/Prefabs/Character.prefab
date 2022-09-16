@@ -59,15 +59,15 @@ MonoBehaviour:
   feetOffset: 1
   feetWidth: 1
   maxSpeed: 10
-  accelerationSpeed: 15
-  decelerationSpeed: 15
-  inAirMaxSpeed: 5
-  inAirAccelerationSpeed: 5
-  inAirDecelerationSpeed: 5
+  accelerationSpeed: 10
+  decelerationSpeed: 8
+  inAirMaxSpeed: 6
+  inAirAccelerationSpeed: 3
+  inAirDecelerationSpeed: 2
   minJumpSpeed: 30
   maxJumpSpeed: 10
-  risingGravityMultiplier: 1
-  fallingGravityMultiplier: 1.5
+  risingGravityMultiplier: 1.2
+  fallingGravityMultiplier: 3
   lookSpeed: 10
   debugMode: 1
 --- !u!114 &3791662118181131157
