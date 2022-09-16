@@ -9,6 +9,7 @@ namespace Game.Behaviours.Player
     using System;
     using UnityEngine.InputSystem;
     using System.Linq;
+    using Unity.VisualScripting;
 
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
@@ -65,6 +66,8 @@ namespace Game.Behaviours.Player
 
         private float horizontalVelocity;
         private float verticalVelocity;
+
+        private bool IsOnGround => CountGroundColliders() > 0;
 
         public override void OnNetworkSpawn()
         {
@@ -133,8 +136,7 @@ namespace Game.Behaviours.Player
             switch (CurrentState)
             {
                 case State.OnGround:
-                    Debug.Log(currentGroundCollisions.Count);
-                    if (currentGroundCollisions.Count < 1)
+                    if (!IsOnGround)
                     {
                         MoveState(Command.StartFalling);
                     }
@@ -151,7 +153,7 @@ namespace Game.Behaviours.Player
                     break;
 
                 case State.Falling:
-                    if (currentGroundCollisions.Count > 0)
+                    if (IsOnGround)
                     {
                         MoveState(Command.HitGround);
                     }
@@ -214,20 +216,6 @@ namespace Game.Behaviours.Player
         private Quaternion LerpLookVector()
         {
             return Quaternion.Lerp(model.transform.rotation, targetLookRotation, lookSpeed * Time.deltaTime);
-        }
-
-
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (collision.contacts.Any(contact => contact.normal == Vector3.up))
-            {
-                currentGroundCollisions.Add(collision.gameObject);
-            }
-        }
-
-        private void OnCollisionExit(Collision collision)
-        {
-            currentGroundCollisions.Remove(collision.gameObject);
         }
 
         /// <summary>
@@ -302,6 +290,26 @@ namespace Game.Behaviours.Player
 
 
             }
+        }
+
+        private int CountGroundColliders()
+        {
+            currentGroundCollisions = currentGroundCollisions.Where(go => go is not null && !go.IsDestroyed()).ToList();
+            return currentGroundCollisions.Count();
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision.contacts.Any(contact => contact.normal == Vector3.up))
+            {
+                currentGroundCollisions.Add(collision.gameObject);
+            }
+        }
+
+
+        private void OnCollisionExit(Collision collision)
+        {
+            currentGroundCollisions.Remove(collision.gameObject);
         }
 
         #region State Machine
