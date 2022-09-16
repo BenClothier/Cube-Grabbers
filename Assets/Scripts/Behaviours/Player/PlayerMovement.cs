@@ -49,8 +49,7 @@ namespace Game.Behaviours.Player
         [Header("Vertical Movement")]
         [SerializeField] private float minJumpSpeed;
         [SerializeField] private float maxJumpSpeed;
-        [SerializeField] private float risingGravityMultiplier = 1;
-        [SerializeField] private float fallingGravityMultiplier = 1.5f;
+        [SerializeField] private AnimationCurve gravityMultiplierByVerticalVelocity;
 
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
@@ -220,8 +219,8 @@ namespace Game.Behaviours.Player
         {
             verticalVelocity = CurrentState switch
             {
-                State.Rising => verticalVelocity + Physics.gravity.y * risingGravityMultiplier * Time.deltaTime,
-                State.Falling => verticalVelocity + Physics.gravity.y * fallingGravityMultiplier * Time.deltaTime,
+                State.Rising => verticalVelocity + Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity) * Time.deltaTime,
+                State.Falling => verticalVelocity + Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity) * Time.deltaTime,
                 _ => 0,
             };
 

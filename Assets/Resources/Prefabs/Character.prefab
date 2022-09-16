@@ -56,18 +56,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 4266255991558908183}
-  feetOffset: 1
-  feetWidth: 1
   maxSpeed: 10
   accelerationSpeed: 10
   decelerationSpeed: 8
   inAirMaxSpeed: 6
   inAirAccelerationSpeed: 3
   inAirDecelerationSpeed: 2
-  minJumpSpeed: 30
+  minJumpSpeed: 5
   maxJumpSpeed: 10
-  risingGravityMultiplier: 1.2
-  fallingGravityMultiplier: 3
+  gravityMultiplierByVerticalVelocity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -3
+      value: 3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0
+      value: 2.5
+      inSlope: -0.3708864
+      outSlope: -0.3708864
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.034437075
+      outWeight: 0.07565084
+    - serializedVersion: 3
+      time: 3.33
+      value: 1.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1256395
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   lookSpeed: 10
   debugMode: 1
 --- !u!114 &3791662118181131157
