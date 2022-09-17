@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 0
   material: {fileID: 2100000, guid: 1325ef12b8b6db2478d3fd9a402de862, type: 2}
   itemDropChances:
-  - ItemID: 0
+  - ItemID: 2
     dropChance: 1
   - ItemID: 0
     dropChance: 0.1
