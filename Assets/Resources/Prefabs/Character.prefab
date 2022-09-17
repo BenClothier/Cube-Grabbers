@@ -62,8 +62,30 @@ MonoBehaviour:
   inAirMaxSpeed: 6
   inAirAccelerationSpeed: 3
   inAirDecelerationSpeed: 2
-  minJumpSpeed: 5
-  maxJumpSpeed: 10
+  jumpSpeedByChargeTime:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 5
+      inSlope: 7.4657245
+      outSlope: 7.4657245
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.020541193
+    - serializedVersion: 3
+      time: 2
+      value: 12
+      inSlope: 1.0539016
+      outSlope: 1.0539016
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.053051054
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   gravityMultiplierByVerticalVelocity:
     serializedVersion: 2
     m_Curve:

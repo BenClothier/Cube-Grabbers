@@ -47,8 +47,7 @@ namespace Game.Behaviours.Player
         [SerializeField] private float inAirDecelerationSpeed;
 
         [Header("Vertical Movement")]
-        [SerializeField] private float minJumpSpeed;
-        [SerializeField] private float maxJumpSpeed;
+        [SerializeField] private AnimationCurve jumpSpeedByChargeTime;
         [SerializeField] private AnimationCurve gravityMultiplierByVerticalVelocity;
         [SerializeField] private EventChannel_Void OnStartChargingJumpChannel;
         [SerializeField] private EventChannel_Void OnJumpChannel;
@@ -56,13 +55,13 @@ namespace Game.Behaviours.Player
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
 
-
-
         private Quaternion targetLookRotation;
         private float targetHorizontalVelocity;
 
         private float horizontalVelocity;
         private float verticalVelocity;
+
+        private float jumpChargeTimeStarted;
 
         private List<GameObject> currentGroundCollisions = new List<GameObject>();
 
@@ -277,6 +276,7 @@ namespace Game.Behaviours.Player
             if (IsInState(State.OnGround))
             {
                 MoveState(Command.StartChargingJump);
+                jumpChargeTimeStarted = Time.time;
                 OnStartChargingJumpChannel.RaiseEvent();
             }
         }
@@ -287,7 +287,7 @@ namespace Game.Behaviours.Player
             {
                 MoveState(Command.StartRising);
                 OnJumpChannel.RaiseEvent();
-                verticalVelocity = maxJumpSpeed;
+                verticalVelocity = jumpSpeedByChargeTime.Evaluate(Time.time - jumpChargeTimeStarted);
             }
         }
 
