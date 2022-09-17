@@ -22,7 +22,7 @@ MonoBehaviour:
   - ItemID: 1
     dropChance: 0.1
   - ItemID: 2
-    dropChance: 0.05
+    dropChance: 0.01
   meshConfigurations:
   - N: 1
     NE: 2
