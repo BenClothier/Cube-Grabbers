@@ -98,7 +98,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemID: 0
-  timeUntilPickupable: 1
+  meshRenderer: {fileID: 1996987164814982139}
+  materialIndex: 1
+  materialDefaultModification: {fileID: 11400000, guid: 1f6b24845cc92764aa19ee33bf74a83d,
+    type: 2}
+  materialHighlightModification: {fileID: 11400000, guid: ba9de7481bc51f34e8e9b7c59ced28a0,
+    type: 2}
 --- !u!135 &6240946891917540226
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -251,6 +256,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 490a6f43d8bc4274994e901b813725b5, type: 3}
+--- !u!114 &1996987164814982139 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5998412270778882457, guid: 490a6f43d8bc4274994e901b813725b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 5226459335471735394}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d9d2a58ce5ef5449933ae387d087f23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &4476691129971670642 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8550220017806564368, guid: 490a6f43d8bc4274994e901b813725b5,

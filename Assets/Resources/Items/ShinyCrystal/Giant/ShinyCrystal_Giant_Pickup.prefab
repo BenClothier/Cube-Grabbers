@@ -98,7 +98,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemID: 2
-  timeUntilPickupable: 1
+  meshRenderer: {fileID: 4107856431398226600}
+  materialIndex: 1
+  materialDefaultModification: {fileID: 11400000, guid: 1f6b24845cc92764aa19ee33bf74a83d,
+    type: 2}
+  materialHighlightModification: {fileID: 11400000, guid: ba9de7481bc51f34e8e9b7c59ced28a0,
+    type: 2}
 --- !u!135 &3786379951136843674
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -257,3 +262,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1531744111127150387}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4107856431398226600 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3189622276849677723, guid: 997f140ac9549b1418fef7e3a141f73e,
+    type: 3}
+  m_PrefabInstance: {fileID: 1531744111127150387}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d9d2a58ce5ef5449933ae387d087f23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
