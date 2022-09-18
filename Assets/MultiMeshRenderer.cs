@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [ExecuteAlways]
@@ -19,5 +20,10 @@ public class MultiMeshRenderer : MonoBehaviour
         {
             Graphics.DrawMesh(meshFilter.sharedMesh, gameObject.transform.position, gameObject.transform.rotation, material, 0);
         }
+    }
+
+    public void ModifyMaterial(int materialIndex, Action<Material> modification)
+    {
+        modification?.Invoke(materials[materialIndex]);
     }
 }

@@ -2,16 +2,18 @@ namespace Game.Behaviours
 {
     using UnityEngine;
     using Unity.Netcode;
-    using System.Collections;
 
-    [RequireComponent(typeof(Collider))]
     public class Pickupable : NetworkBehaviour
     {
-        private readonly NetworkVariable<bool> isPickupable = new(false);
+        private readonly NetworkVariable<bool> isPickupable = new (true);
 
         [SerializeField] private int itemID;
-        [Space]
-        [SerializeField] private float timeUntilPickupable = 1f;
+
+        [Header("Outline Shader Modification")]
+        [SerializeField] private MultiMeshRenderer meshRenderer;
+        [SerializeField] private int materialIndex;
+        [SerializeField] private MaterialColourModification materialDefaultModification;
+        [SerializeField] private MaterialColourModification materialHighlightModification;
 
         public int ItemID => itemID;
 
@@ -20,12 +22,7 @@ namespace Game.Behaviours
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-
-            if (IsServer)
-            {
-                isPickupable.Value = false;
-                StartCoroutine(WaitToEnablePickup());
-            }
+            meshRenderer.ModifyMaterial(materialIndex, materialDefaultModification.ModificationAction);
         }
 
         public void SetItemID(int id)
@@ -33,10 +30,15 @@ namespace Game.Behaviours
             itemID = id;
         }
 
-        private IEnumerator WaitToEnablePickup()
+        private void OnMouseEnter()
         {
-            yield return new WaitForSeconds(timeUntilPickupable);
-            isPickupable.Value = true;
+            Debug.Log("HELLO");
+            meshRenderer.ModifyMaterial(materialIndex, materialHighlightModification.ModificationAction);
+        }
+
+        private void OnMouseExit()
+        {
+            meshRenderer.ModifyMaterial(materialIndex, materialDefaultModification.ModificationAction);
         }
     }
 }
