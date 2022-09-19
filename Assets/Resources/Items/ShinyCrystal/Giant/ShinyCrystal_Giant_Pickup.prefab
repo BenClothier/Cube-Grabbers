@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6810275702801931724}
   - component: {fileID: 836212704089189335}
+  - component: {fileID: 4544027282308876773}
   m_Layer: 0
   m_Name: Collider
   m_TagString: Untagged
@@ -46,6 +47,48 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -329098048951903608, guid: 03ef92e86fb1697419fdb48ef5c96abc, type: 3}
+--- !u!114 &4544027282308876773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1832813877285602872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 866fe9218186ce54db0341851e52d10c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnMouseEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4107856431398226600}
+        m_TargetAssemblyTypeName: MultiMeshRenderer, Assembly-CSharp
+        m_MethodName: SwitchMaterial
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OutlineHlt
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnMouseExit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4107856431398226600}
+        m_TargetAssemblyTypeName: MultiMeshRenderer, Assembly-CSharp
+        m_MethodName: SwitchMaterial
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OutlineDef
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &9187698346499238758
 GameObject:
   m_ObjectHideFlags: 0
@@ -97,12 +140,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemID: 2
-  meshRenderer: {fileID: 4107856431398226600}
-  materialIndex: 1
-  materialDefaultModification: {fileID: 11400000, guid: 1f6b24845cc92764aa19ee33bf74a83d,
-    type: 2}
-  materialHighlightModification: {fileID: 11400000, guid: ba9de7481bc51f34e8e9b7c59ced28a0,
-    type: 2}
 --- !u!54 &8581954076396865700
 Rigidbody:
   m_ObjectHideFlags: 0

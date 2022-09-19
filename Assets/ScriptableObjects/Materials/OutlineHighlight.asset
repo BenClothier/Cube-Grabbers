@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b8f245874f16cf4ba620c18cf9e8f78, type: 3}
-  m_Name: OutlineDefault
+  m_Script: {fileID: 11500000, guid: 32cffb5d6e37d8b4aad99bf873301091, type: 3}
+  m_Name: OutlineHighlight
   m_EditorClassIdentifier: 
-  propertyReference: _OutlineColour
-  color: {r: 0, g: 0, b: 0, a: 1}
+  SwitchID: OutlineHlt
+  MaterialID: Outline
+  NewMaterial: {fileID: 2100000, guid: 37b9e1bdfbd86264283f844f3e4206bc, type: 2}

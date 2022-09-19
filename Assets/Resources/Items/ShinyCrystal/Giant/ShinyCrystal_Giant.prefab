@@ -55,8 +55,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   materials:
-  - {fileID: 2100000, guid: 1c912c6c84968d44e8f07ce1e527b7de, type: 2}
-  - {fileID: 2100000, guid: 98ec31e47e9e1ba4d8d48354ba6b052c, type: 2}
+  - MaterialID: Base
+    Material: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - MaterialID: Outline
+    Material: {fileID: 2100000, guid: 98ec31e47e9e1ba4d8d48354ba6b052c, type: 2}
+  materialSwitches:
+  - {fileID: 11400000, guid: d87adc7a036ea684f82a26792bb3a219, type: 2}
+  - {fileID: 11400000, guid: 3eb9b69c124d1be4da2156fba242c107, type: 2}
 --- !u!1 &1950370966157395453
 GameObject:
   m_ObjectHideFlags: 0

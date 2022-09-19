@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: OutlineShader
+  m_Name: OutlineHighlight
   m_Shader: {fileID: -6465566751694194690, guid: 416f4be66eb6d7049aae533596b07f70,
     type: 3}
   m_ValidKeywords: []
@@ -60,7 +60,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 1, g: 0.68712854, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &7567825125888889011
 MonoBehaviour:
