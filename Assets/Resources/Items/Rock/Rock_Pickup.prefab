@@ -56,7 +56,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2238375769194123553}
   - component: {fileID: 9057044018643178757}
-  - component: {fileID: 6240946891917540226}
   - component: {fileID: 4307602966965284455}
   - component: {fileID: 7466160813566607217}
   - component: {fileID: 4359233612418496874}
@@ -104,19 +103,6 @@ MonoBehaviour:
     type: 2}
   materialHighlightModification: {fileID: 11400000, guid: ba9de7481bc51f34e8e9b7c59ced28a0,
     type: 2}
---- !u!135 &6240946891917540226
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6869822040541289411}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.55
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4307602966965284455
 Rigidbody:
   m_ObjectHideFlags: 0
