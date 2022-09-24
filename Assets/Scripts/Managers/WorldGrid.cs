@@ -258,29 +258,16 @@ namespace Game.Components
                         {
                             Mesh mesh = meshConfig.MainMeshes[i];
 
-                            if (mesh is not null)
+                            if (mesh != null)
                             {
-                                Transform face = new GameObject($"Face", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
-
-                                face.parent = blockParent;
-                                face.localPosition = Vector3.up;
-                                face.RotateAround(blockParent.position, Vector3.forward, Block.DIRECTION_ANGLES[i]);
-                                face.GetComponent<MeshFilter>().mesh = mesh;
-                                face.GetComponent<MeshRenderer>().material = block.Material;
-                                face.GetComponent<MeshCollider>().sharedMesh = mesh;
+                                AddSideFace(block, blockParent, mesh, Block.DIRECTION_ANGLES[i]);
                             }
                         }
 
                         // Render the front mesh if the pattern requires it
-                        if (meshConfig.FrontMesh is not null)
+                        if (meshConfig.FrontMesh != null)
                         {
-                            Transform frontFace = new GameObject($"FrontFace", typeof(MeshFilter), typeof(MeshRenderer)).transform;
-
-                            frontFace.parent = blockParent;
-                            frontFace.localPosition = Vector3.up;
-                            frontFace.RotateAround(blockParent.position, Vector3.left, 90);
-                            frontFace.GetComponent<MeshFilter>().mesh = meshConfig.FrontMesh;
-                            frontFace.GetComponent<MeshRenderer>().material = block.Material;
+                            AddFrontFace(block, blockParent, meshConfig.FrontMesh);
                         }
 
                         // Update the 'worldBlocks' dictionary
@@ -292,6 +279,32 @@ namespace Game.Components
                     Debug.LogError($"Now block was found with ID [{cell.Value}]");
                 }
             }
+        }
+
+        private static void AddSideFace(Block block, Transform blockParent, Mesh mesh, float rotAngle)
+        {
+            Transform face = new GameObject($"Face", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
+
+            face.tag = "Mineable";
+            face.parent = blockParent;
+            face.localPosition = Vector3.up;
+            face.RotateAround(blockParent.position, Vector3.forward, rotAngle);
+            face.GetComponent<MeshFilter>().mesh = mesh;
+            face.GetComponent<MeshRenderer>().material = block.Material;
+            face.GetComponent<MeshCollider>().sharedMesh = mesh;
+        }
+
+        private static void AddFrontFace(Block block, Transform blockParent, Mesh mesh)
+        {
+            Transform face = new GameObject($"FrontFace", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)).transform;
+
+            face.tag = "Mineable";
+            face.parent = blockParent;
+            face.localPosition = Vector3.up;
+            face.RotateAround(blockParent.position, Vector3.left, 90);
+            face.GetComponent<MeshFilter>().mesh = mesh;
+            face.GetComponent<MeshRenderer>().material = block.Material;
+            face.GetComponent<MeshCollider>().sharedMesh = mesh;
         }
 
         private void RemoveBlock(Vector2Int loc)
