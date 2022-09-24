@@ -109,24 +109,32 @@ namespace Game.Behaviours.Player
         {
             if (collider.CompareTag("Mineable") && Vector2.Distance(collider.transform.position, transform.position) <= maxMiningDistance)
             {
-                if (miningRoutine is null)
+                Vector2Int gridLoc = WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position);
+                if (WorldController.Instance.WorldGrid.TryGetNearestEmptyNeighbour(transform.position, gridLoc, out Vector2? nearestEmptyNeighbourPos, neighbourSet: Components.WorldGrid.NeighbourSet.Normal))
                 {
-                    Vector2Int gridLoc = WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position);
-                    if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
+                    if (miningRoutine is null)
                     {
-                        stateMachine.TryMoveState(Command.StartMining);
-                        onStartMiningEvent.InvokeEvent(collider.transform.parent.position);
-                        miningRoutine = StartCoroutine(MiningRoutine(gridLoc, secondsToMine.Value));
-                        return true;
+                        if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
+                        {
+                            Vector2 dirToCell = ((Vector2)collider.transform.parent.position - nearestEmptyNeighbourPos.Value).normalized;
+                            stateMachine.TryMoveState(Command.StartMining);
+                            onStartMiningEvent.InvokeEvent(nearestEmptyNeighbourPos.Value + dirToCell / 2);
+                            miningRoutine = StartCoroutine(MiningRoutine(gridLoc, secondsToMine.Value));
+                            return true;
+                        }
+                        else
+                        {
+                            Debug.LogError("Failed to get seconds-to-mine for the given grid location");
+                        }
                     }
                     else
                     {
-                        Debug.LogError("Failed to get seconds-to-mine for the given grid location");
+                        Debug.LogError("Attempted to start a second mining routine. This should not happen.");
                     }
                 }
                 else
                 {
-                    Debug.LogError("Attempted to start a second mining routine. This should not happen.");
+                    Debug.LogWarning("Couldn't find empty positions for cell.");
                 }
             }
 

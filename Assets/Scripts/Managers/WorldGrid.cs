@@ -25,6 +25,12 @@ namespace Game.Components
             { NeighbourDir.NW, Vector2Int.up + Vector2Int.left},
         };
 
+        private static readonly NeighbourDir[] ALL_NEIGHBOURS = new NeighbourDir[] { NeighbourDir.N, NeighbourDir.NE, NeighbourDir.E, NeighbourDir.SE, NeighbourDir.S, NeighbourDir.SW, NeighbourDir.W, NeighbourDir.NW };
+
+        private static readonly NeighbourDir[] NORMAL_NEIGHBOURS = new NeighbourDir[] { NeighbourDir.N, NeighbourDir.E, NeighbourDir.S, NeighbourDir.W };
+
+        private static readonly NeighbourDir[] DIAGONAL_NEIGHBOURS = new NeighbourDir[] { NeighbourDir.NE, NeighbourDir.SE, NeighbourDir.SW, NeighbourDir.NW };
+
         [SerializeField] private Vector2Int gridFillMin;
         [SerializeField] private Vector2Int gridFillMax;
 
@@ -54,6 +60,13 @@ namespace Game.Components
             NW  = 0b10000000,
 
             All = 0b11111111,
+        }
+
+        public enum NeighbourSet
+        {
+            All,
+            Normal,
+            Diagonal,
         }
 
         public Grid Grid { get; private set; }
@@ -157,25 +170,48 @@ namespace Game.Components
         }
 
         
-        public Vector2Int[] GetNeighbourLocations(Vector2Int loc, bool includeThisLocation = false, bool clampToWorldBounds = true)
+        public Vector2Int[] GetNeighbourLocations(Vector2Int loc, bool includeThisLocation = false, bool clampToWorldBounds = true, NeighbourSet neighbourSet = NeighbourSet.All)
         {
-            IEnumerable<Vector2Int> neighbourLcoations;
+            IEnumerable<Vector2Int> neighbourLocations;
+            NeighbourDir[] neighbourDirs = GetNeighbourSet(neighbourSet);
 
             if (includeThisLocation)
             {
-                neighbourLcoations = DIRECTION_VECTORS.Values.Select(dir => dir + loc).Append(loc);
+                neighbourLocations = neighbourDirs.Select(dir => DIRECTION_VECTORS[dir] + loc).Append(loc);
             }
             else
             {
-                neighbourLcoations = DIRECTION_VECTORS.Values.Select(dir => dir + loc);
+                neighbourLocations = neighbourDirs.Select(dir => DIRECTION_VECTORS[dir] + loc);
             }
 
             if (!clampToWorldBounds)
             {
-                return neighbourLcoations.ToArray();
+                return neighbourLocations.ToArray();
             }
 
-            return neighbourLcoations.Where(loc => loc.x >= gridFillMin.x && loc.y >= gridFillMin.y && loc.x <= gridFillMax.x && loc.y <= gridFillMax.y).ToArray();
+            return neighbourLocations.Where(loc => loc.x >= gridFillMin.x && loc.y >= gridFillMin.y && loc.x <= gridFillMax.x && loc.y <= gridFillMax.y).ToArray();
+        }
+
+        public bool TryGetNearestEmptyNeighbour(Vector2 yourPos, Vector2Int cellPos, out Vector2? nearestEmptyNeighbourPos, bool clampToWorldBounds = false, NeighbourSet neighbourSet = NeighbourSet.All)
+        {
+            var emptyCells = GetNeighbourLocations(cellPos, clampToWorldBounds: clampToWorldBounds, neighbourSet: neighbourSet)
+                .Where(pos => !TryGetCell(pos, out int? cell));
+
+            if (emptyCells.Count() > 0)
+            {
+                nearestEmptyNeighbourPos = emptyCells
+                    .Select(pos => GetWorldPosFromGridLoc(pos))
+                    .Select(worldPos => new { Pos = worldPos, Dist = Vector2.Distance(yourPos, worldPos) })
+                    .Aggregate((smallestWorldPos, thisWorldPos) => thisWorldPos.Dist < smallestWorldPos.Dist ? thisWorldPos : smallestWorldPos)
+                    .Pos;
+
+                return true;
+            }
+            else
+            {
+                nearestEmptyNeighbourPos = null;
+                return false;
+            }
         }
 
         /// <summary>
@@ -216,6 +252,16 @@ namespace Game.Components
             Grid = GetComponent<Grid>();
             OnPushGridUpdate += RenderMainGrid;
             OnPushGridUpdate += RenderBackground;
+        }
+
+        private NeighbourDir[] GetNeighbourSet(NeighbourSet neighbourSet)
+        {
+            return neighbourSet switch
+            {
+                NeighbourSet.Normal => NORMAL_NEIGHBOURS,
+                NeighbourSet.Diagonal => DIAGONAL_NEIGHBOURS,
+                _ => ALL_NEIGHBOURS,
+            };
         }
 
         #region Render Main Grid

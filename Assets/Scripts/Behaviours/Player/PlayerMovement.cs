@@ -198,12 +198,17 @@ namespace Game.Behaviours.Player
             if (lerpTarget.HasValue)
             {
                 float dist = Vector2.Distance(transform.position, lerpTarget.Value);
-                float thisFrameProgress = Time.deltaTime / (dist / lerpSpeedByDistanceCurve.Evaluate(dist));
-                transform.position = Vector2.Lerp(transform.position, lerpTarget.Value, thisFrameProgress);
+                float speed = lerpSpeedByDistanceCurve.Evaluate(dist);
 
-                if (onReachTargetCallback is not null && thisFrameProgress >= 1)
+                if (speed > 0)
                 {
-                    onReachTargetCallback?.Invoke();
+                    float thisFrameProgress = Time.deltaTime / (dist / speed);
+                    transform.position = Vector2.Lerp(transform.position, lerpTarget.Value, thisFrameProgress);
+
+                    if (onReachTargetCallback is not null && thisFrameProgress >= 1)
+                    {
+                        onReachTargetCallback?.Invoke();
+                    }
                 }
             }
             else
