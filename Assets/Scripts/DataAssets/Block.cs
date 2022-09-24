@@ -16,11 +16,14 @@ namespace Game.DataAssets
             90,
         };
 
+        [Header("General")]
         [SerializeField] private int id;
-        [SerializeField] private Material material;
         [Range(0, 60)][SerializeField] private float secondsToMine = 3;
         [Space]
         [SerializeField] private ItemDropChance[] itemDropChances;
+
+        [Header("Visual")]
+        [SerializeField] private Material material;
         [Space]
         [SerializeField] private ConfigurationPattern[] meshConfigurations;
 
@@ -40,6 +43,8 @@ namespace Game.DataAssets
         }
 
         public int ID => id;
+
+        public float SecondsToMine => secondsToMine;
 
         public Material Material => material;
 
