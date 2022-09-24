@@ -47,7 +47,8 @@ namespace Game.Behaviours.Player
                 Ray ray = Camera.main.ScreenPointToRay(UserInputManager.Instance.MousePos);
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    bool didDoSomething =
+                    // Defines order of checking and will stop once one is successful
+                    bool success = 
                         TryPickup(hit.collider)
                         || TryMine(hit.collider);
                 }
@@ -139,6 +140,9 @@ namespace Game.Behaviours.Player
 
         #region Mining Behaviour
 
+        [Header("Mining")]
+        [SerializeField] private float maxMiningDistance;
+
         private void InitialiseMiningBehaviour()
         {
         }
@@ -149,7 +153,7 @@ namespace Game.Behaviours.Player
 
         private bool TryMine(Collider collider)
         {
-            if (collider.CompareTag("Mineable"))
+            if (collider.CompareTag("Mineable") && Vector2.Distance(collider.transform.position, transform.position) <= maxMiningDistance)
             {
                 RequestMineCellServerRpc(WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position));
 
@@ -186,6 +190,8 @@ namespace Game.Behaviours.Player
 
         // PICKUP BEHAVIOUR //
 
+        [Header("Pickup")]
+        [SerializeField] private float maxPickupDistance;
         [SerializeField] private Transform objectHoldingPos;
 
         private Holdable heldObject;
@@ -194,7 +200,7 @@ namespace Game.Behaviours.Player
 
         private bool TryPickup(Collider collider)
         {
-            if (collider.CompareTag("Pickupable"))
+            if (collider.CompareTag("Pickupable") && Vector2.Distance(collider.transform.position, transform.position) <= maxPickupDistance)
             {
                 Pickupable pickupable = collider.gameObject.GetComponentInParent<Pickupable>();
 

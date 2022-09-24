@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: ShinyCrystal
   m_EditorClassIdentifier: 
   id: 1
-  pickupPrefab: {fileID: 1800823237, guid: 48a9dc666a2a86b4890e23e03f73b0c0, type: 3}
+  pickupPrefab: {fileID: 6466953339582746828, guid: 48a9dc666a2a86b4890e23e03f73b0c0,
+    type: 3}
   holdablePrefab: {fileID: 7226550322120026300, guid: 833908f64af6f7b4fa89cf10bd7b2feb,
     type: 3}

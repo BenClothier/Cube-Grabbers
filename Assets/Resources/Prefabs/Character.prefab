@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3158402661599004541}
-  - component: {fileID: 532733660145304967}
   - component: {fileID: 3791662118181131157}
+  - component: {fileID: 532733660145304967}
   - component: {fileID: 4924653361221388928}
   - component: {fileID: 7426379086903629997}
   - component: {fileID: 2340340342872200675}
@@ -43,6 +43,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3791662118181131157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3158402661599004540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb7f62e7b23dc784e8e848b98319a99c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxMiningDistance: 5
+  maxPickupDistance: 5
+  objectHoldingPos: {fileID: 1263291301082946074}
+  throwSpeedMultiplier: 2
+  maxThrowSpeed: 12
+  minThrowSpeed: 0
+  arcTargetPrefab: {fileID: 2609898374134421683, guid: ad1467598dc720d40a943a3027508a15,
+    type: 3}
+  throwArcLineRenderer: {fileID: 8749276599346406035}
+  throwTangentLineRenderer: {fileID: 1518838972358812300}
 --- !u!114 &532733660145304967
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,26 +146,6 @@ MonoBehaviour:
   OnJumpChannel: {fileID: 11400000, guid: f7530b881cc720143ba263c0d1a157a7, type: 2}
   lookSpeed: 10
   debugMode: 1
---- !u!114 &3791662118181131157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3158402661599004540}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb7f62e7b23dc784e8e848b98319a99c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectHoldingPos: {fileID: 1263291301082946074}
-  throwSpeedMultiplier: 2
-  maxThrowSpeed: 12
-  minThrowSpeed: 0
-  arcTargetPrefab: {fileID: 2609898374134421683, guid: ad1467598dc720d40a943a3027508a15,
-    type: 3}
-  throwArcLineRenderer: {fileID: 8749276599346406035}
-  throwTangentLineRenderer: {fileID: 1518838972358812300}
 --- !u!54 &4924653361221388928
 Rigidbody:
   m_ObjectHideFlags: 0

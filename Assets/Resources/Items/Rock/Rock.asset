@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rock
   m_EditorClassIdentifier: 
   id: 0
-  pickupPrefab: {fileID: 9057044018643178757, guid: 7b5805e0b98795740870641fb70124de,
+  pickupPrefab: {fileID: 8634508821735933643, guid: 7b5805e0b98795740870641fb70124de,
     type: 3}
   holdablePrefab: {fileID: 5647143868787915011, guid: 6c3d83c507c82c14e98ec1b991f4fa55,
     type: 3}
