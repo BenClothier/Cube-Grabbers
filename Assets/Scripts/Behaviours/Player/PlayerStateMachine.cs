@@ -16,7 +16,7 @@ public class PlayerStateMachine : MonoBehaviour
         { new StateTransition(State.OnGroundHolding, Command.StartFalling), State.FallingHolding },
         { new StateTransition(State.OnGroundHolding, Command.StartAiming), State.OnGroundAiming },
 
-        { new StateTransition(State.OnGroundAiming, Command.StartChargingJump), State.ChargingJumpHolding },
+        { new StateTransition(State.OnGroundAiming, Command.StartChargingJump), State.ChargingJumpAiming },
         { new StateTransition(State.OnGroundAiming, Command.StartFalling), State.FallingAiming },
         { new StateTransition(State.OnGroundAiming, Command.CancelAim), State.OnGroundHolding },
         { new StateTransition(State.OnGroundAiming, Command.Throw), State.OnGround },
