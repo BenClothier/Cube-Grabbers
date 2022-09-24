@@ -22,6 +22,9 @@ namespace Game.Behaviours.Player
             {
                 InitialiseMiningBehaviour();
                 InitialisePickupThrowBehaviour();
+                UserInputManager.Instance.OnPrimaryMouseDown += OnPrimaryMouseDown;
+                UserInputManager.Instance.OnPrimaryMouseUp += OnPrimaryMouseUp;
+                UserInputManager.Instance.OnSecondaryMouseDown += OnSecondaryMouseDown;
             }
         }
 
@@ -33,14 +36,41 @@ namespace Game.Behaviours.Player
             {
                 ShutdownMiningBehaviour();
                 ShutdownPickupThrowBehaviour();
+                UserInputManager.Instance.OnPrimaryMouseDown -= OnPrimaryMouseDown;
             }
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void OnPrimaryMouseDown(InputAction.CallbackContext context)
         {
-            if (IsOwner)
+            if (IsInState(State.Idle))
             {
-                CheckTriggerWithPickupBehaviour(other);
+                Ray ray = Camera.main.ScreenPointToRay(UserInputManager.Instance.MousePos);
+                if (Physics.Raycast(ray, out RaycastHit hit))
+                {
+                    bool didDoSomething =
+                        TryPickup(hit.collider)
+                        || TryMine(hit.collider);
+                }
+            }
+            else if (IsInState(State.HoldingObject))
+            {
+                Aim();
+            }
+        }
+
+        private void OnPrimaryMouseUp(InputAction.CallbackContext context)
+        {
+            if (IsInState(State.Aiming))
+            {
+                Throw();
+            }
+        }
+
+        private void OnSecondaryMouseDown(InputAction.CallbackContext context)
+        {
+            if (IsInState(State.Aiming))
+            {
+                CancelAim();
             }
         }
 
@@ -111,22 +141,22 @@ namespace Game.Behaviours.Player
 
         private void InitialiseMiningBehaviour()
         {
-            UserInputManager.Instance.OnPrimaryMouseDown += OnPrimaryMouseDown;
         }
 
         private void ShutdownMiningBehaviour()
         {
-            UserInputManager.Instance.OnPrimaryMouseDown -= OnPrimaryMouseDown;
         }
 
-        private void OnPrimaryMouseDown(InputAction.CallbackContext context)
+        private bool TryMine(Collider collider)
         {
-            if (IsInState(State.Idle))
+            if (collider.CompareTag("Mineable"))
             {
-                RequestMineCellServerRpc(
-                    WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(
-                        Raycasting.CalculateMousePlaneInstersect(UserInputManager.Instance.MousePos, Vector3.forward * 2, Vector3.forward)));
+                RequestMineCellServerRpc(WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position));
+
+                return true;
             }
+
+            return false;
         }
 
         [ServerRpc]
@@ -141,9 +171,6 @@ namespace Game.Behaviours.Player
 
         private void InitialisePickupThrowBehaviour()
         {
-            UserInputManager.Instance.OnPrimaryMouseDown += Aim;
-            UserInputManager.Instance.OnPrimaryMouseUp += Throw;
-            UserInputManager.Instance.OnSecondaryMouseDown += CancelAim;
 
             arcTargetInstance = Instantiate(arcTargetPrefab, transform).transform;
             SetArcActive(false);
@@ -165,8 +192,25 @@ namespace Game.Behaviours.Player
 
         public Vector3 HoldingPosition => objectHoldingPos.position;
 
+        private bool TryPickup(Collider collider)
+        {
+            if (collider.CompareTag("Pickupable"))
+            {
+                Pickupable pickupable = collider.gameObject.GetComponentInParent<Pickupable>();
+
+                if (pickupable.IsPickupable)
+                {
+                    RequestPickupServerRpc(pickupable.NetworkObjectId);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         [ServerRpc]
-        public void RequestPickupServerRpc(ulong pickupNetObjID)
+        private void RequestPickupServerRpc(ulong pickupNetObjID)
         {
             if (NetworkManager.SpawnManager.SpawnedObjects[pickupNetObjID].gameObject.TryGetComponent(out Pickupable pickupable))
             {
@@ -190,7 +234,7 @@ namespace Game.Behaviours.Player
         }
 
         [ClientRpc]
-        public void GrantPickupClientRpc(ulong pickupNetObjID)
+        private void GrantPickupClientRpc(ulong pickupNetObjID)
         {
             if (!IsServer)
             {
@@ -206,19 +250,6 @@ namespace Game.Behaviours.Player
                 else
                 {
                     Debug.LogError("Something went wrong when trying to find the pickupable's network object.");
-                }
-            }
-        }
-
-        private void CheckTriggerWithPickupBehaviour(Collider other)
-        {
-            if (IsInState(State.Idle) && IsClient && IsOwner && other.gameObject.CompareTag("Pickupable"))
-            {
-                Pickupable pickupable = other.gameObject.GetComponent<Pickupable>();
-
-                if (pickupable.IsPickupable)
-                {
-                    RequestPickupServerRpc(pickupable.NetworkObjectId);
                 }
             }
         }
@@ -276,7 +307,7 @@ namespace Game.Behaviours.Player
             }
         }
 
-        private void Aim(InputAction.CallbackContext context)
+        private void Aim()
         {
             if (IsInState(State.HoldingObject))
             {
@@ -291,7 +322,7 @@ namespace Game.Behaviours.Player
             }
         }
 
-        private void Throw(InputAction.CallbackContext context)
+        private void Throw()
         {
             if (IsInState(State.Aiming))
             {
@@ -308,7 +339,7 @@ namespace Game.Behaviours.Player
             }
         }
 
-        private void CancelAim(InputAction.CallbackContext context)
+        private void CancelAim()
         {
             if (IsInState(State.Aiming))
             {

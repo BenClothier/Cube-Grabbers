@@ -60,7 +60,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _OutlineColor: {r: 1, g: 0.68712854, b: 0, a: 0}
+    - _OutlineColor: {r: 0.7254902, g: 0.51937693, b: 0.1254902, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &7567825125888889011
 MonoBehaviour:
