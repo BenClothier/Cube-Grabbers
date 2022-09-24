@@ -8,18 +8,20 @@ namespace Game.Behaviours.Player
     using UnityEngine;
     using Unity.Netcode;
     using UnityEngine.InputSystem;
-    using System.Collections.Generic;
     using System.Collections;
-    using System;
+    using static PlayerStateMachine;
 
     public class PlayerAction : NetworkBehaviour
     {
+        private PlayerStateMachine stateMachine;
+
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
 
             if (IsOwner)
             {
+                stateMachine = GetComponent<PlayerStateMachine>();
                 InitialiseMiningBehaviour();
                 InitialisePickupThrowBehaviour();
                 UserInputManager.Instance.OnPrimaryMouseDown += OnPrimaryMouseDown;
@@ -42,18 +44,15 @@ namespace Game.Behaviours.Player
 
         private void OnPrimaryMouseDown(InputAction.CallbackContext context)
         {
-            if (IsInState(State.Idle))
+            if (stateMachine.IsInStateGroup(StateGroup.CanMine))
             {
                 Ray ray = Camera.main.ScreenPointToRay(UserInputManager.Instance.MousePos);
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    // Defines order of checking and will stop once one is successful
-                    bool success = 
-                        TryPickup(hit.collider)
-                        || TryMine(hit.collider);
+                    TryMine(hit.collider);
                 }
             }
-            else if (IsInState(State.HoldingObject))
+            else if (stateMachine.IsInStateGroup(StateGroup.Holding))
             {
                 Aim();
             }
@@ -61,7 +60,15 @@ namespace Game.Behaviours.Player
 
         private void OnPrimaryMouseUp(InputAction.CallbackContext context)
         {
-            if (IsInState(State.Aiming))
+            if (stateMachine.IsInStateGroup(StateGroup.CanPickup))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(UserInputManager.Instance.MousePos);
+                if (Physics.Raycast(ray, out RaycastHit hit))
+                {
+                    TryPickup(hit.collider);
+                }
+            }
+            if (stateMachine.IsInStateGroup(StateGroup.Aiming))
             {
                 Throw();
             }
@@ -69,74 +76,11 @@ namespace Game.Behaviours.Player
 
         private void OnSecondaryMouseDown(InputAction.CallbackContext context)
         {
-            if (IsInState(State.Aiming))
+            if (stateMachine.IsInStateGroup(StateGroup.Aiming))
             {
                 CancelAim();
             }
         }
-
-        #region State Machine
-
-        public State CurrentState { get; private set; }
-
-        private static readonly Dictionary<StateTransition, State> transitions = new Dictionary<StateTransition, State>()
-        {
-            // Pickup/Throw Behaviour
-            { new StateTransition(State.Idle, Command.Pickup), State.HoldingObject },
-            { new StateTransition(State.HoldingObject, Command.Aim), State.Aiming },
-            { new StateTransition(State.Aiming, Command.CancelAim), State.HoldingObject },
-            { new StateTransition(State.Aiming, Command.Throw), State.Idle },
-        };
-
-        private State GetState(Command command)
-        {
-            StateTransition transition = new StateTransition(CurrentState, command);
-
-            if (!transitions.TryGetValue(transition, out State nextState))
-            {
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
-            }
-
-            return nextState;
-        }
-
-        public State MoveState(Command command)
-        {
-            CurrentState = GetState(command);
-            Debug.Log($"New State: {CurrentState}");
-            return CurrentState;
-        }
-
-        public bool IsInState(State state) => CurrentState.Equals(state);
-
-        public enum State
-        {
-            Idle,
-            HoldingObject,
-            Aiming,
-        }
-
-        public enum Command
-        {
-            Pickup,
-            Aim,
-            CancelAim,
-            Throw,
-        }
-
-        private struct StateTransition
-        {
-            public State currentState;
-            public Command transition;
-
-            public StateTransition(State currentState, Command transition)
-            {
-                this.currentState = currentState;
-                this.transition = transition;
-            }
-        }
-
-        #endregion
 
         #region Mining Behaviour
 
@@ -229,7 +173,7 @@ namespace Game.Behaviours.Player
 
                     if (IsOwner)
                     {
-                        MoveState(Command.Pickup);
+                        stateMachine.TryMoveState(Command.Pickup);
                     }
                 }
             }
@@ -250,7 +194,7 @@ namespace Game.Behaviours.Player
 
                     if (IsOwner)
                     {
-                        MoveState(Command.Pickup);
+                        stateMachine.TryMoveState(Command.Pickup);
                     }
                 }
                 else
@@ -309,15 +253,15 @@ namespace Game.Behaviours.Player
 
             if (IsOwner)
             {
-                MoveState(Command.Throw);
+                stateMachine.TryMoveState(Command.Throw);
             }
         }
 
         private void Aim()
         {
-            if (IsInState(State.HoldingObject))
+            if (stateMachine.IsInStateGroup(StateGroup.Holding))
             {
-                MoveState(Command.Aim);
+                stateMachine.TryMoveState(Command.StartAiming);
 
                 if (calcAndDrawLaunchPathRoutine is not null)
                 {
@@ -330,7 +274,7 @@ namespace Game.Behaviours.Player
 
         private void Throw()
         {
-            if (IsInState(State.Aiming))
+            if (stateMachine.IsInStateGroup(StateGroup.Aiming))
             {
                 if (launchPathInfo.HasValue)
                 {
@@ -339,7 +283,7 @@ namespace Game.Behaviours.Player
                 }
                 else
                 {
-                    MoveState(Command.CancelAim);
+                    stateMachine.TryMoveState(Command.CancelAim);
                     launchPathInfo = null;
                 }
             }
@@ -347,16 +291,16 @@ namespace Game.Behaviours.Player
 
         private void CancelAim()
         {
-            if (IsInState(State.Aiming))
+            if (stateMachine.IsInStateGroup(StateGroup.Aiming))
             {
-                MoveState(Command.CancelAim);
+                stateMachine.TryMoveState(Command.CancelAim);
                 launchPathInfo = null;
             }
         }
 
         private IEnumerator CalculateAndRenderThrowPathRoutine()
         {
-            while (IsInState(State.Aiming))
+            while (stateMachine.IsInStateGroup(StateGroup.Aiming))
             {
                 Vector3 mouseWorldPoint = Raycasting.CalculateMousePlaneInstersect(Mouse.current.position.ReadValue(), Vector3.zero, Vector3.back);
 

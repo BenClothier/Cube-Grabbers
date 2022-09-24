@@ -10,6 +10,7 @@ namespace Game.Behaviours.Player
     using UnityEngine.InputSystem;
     using System.Linq;
     using Unity.VisualScripting;
+    using static PlayerStateMachine;
 
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
@@ -55,17 +56,17 @@ namespace Game.Behaviours.Player
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
 
+        private PlayerStateMachine stateMachine;
+        private CinemachineVirtualCamera mainVirtualCam;
+
         private Quaternion targetLookRotation;
         private float targetHorizontalVelocity;
-
         private float horizontalVelocity;
         private float verticalVelocity;
 
         private float jumpChargeTimeStarted;
 
         private List<GameObject> currentGroundCollisions = new List<GameObject>();
-
-        private CinemachineVirtualCamera mainVirtualCam;
 
         private bool IsOnGround => CountGroundColliders() > 0;
 
@@ -81,6 +82,7 @@ namespace Game.Behaviours.Player
 
             if (IsClient && IsOwner)
             {
+                stateMachine = GetComponent<PlayerStateMachine>();
                 UserInputManager.Instance.OnJumpPressed += OnJumpPressed;
                 UserInputManager.Instance.OnJumpReleased += OnJumpReleased;
             }
@@ -132,31 +134,26 @@ namespace Game.Behaviours.Player
         /// </summary>
         private void ClientInput()
         {
-            switch (CurrentState)
+            if (stateMachine.IsInStateGroup(StateGroup.OnGround))
             {
-                case State.OnGround:
-                    if (!IsOnGround)
-                    {
-                        MoveState(Command.StartFalling);
-                    }
-                    break;
-
-                case State.ChargingJump:
-                    break;
-
-                case State.Rising:
-                    if (verticalVelocity <= 0)
-                    {
-                        MoveState(Command.StartFalling);
-                    }
-                    break;
-
-                case State.Falling:
-                    if (IsOnGround)
-                    {
-                        MoveState(Command.HitGround);
-                    }
-                    break;
+                if (!IsOnGround)
+                {
+                    stateMachine.TryMoveState(Command.StartFalling);
+                }
+            }
+            else if (stateMachine.IsInStateGroup(StateGroup.Rising))
+            {
+                if (verticalVelocity <= 0)
+                {
+                    stateMachine.TryMoveState(Command.StartFalling);
+                }
+            }
+            else if (stateMachine.IsInStateGroup(StateGroup.Falling))
+            {
+                if (IsOnGround)
+                {
+                    stateMachine.TryMoveState(Command.HitGround);
+                }
             }
 
             CalcAndSetTargetLookRotation();
@@ -220,15 +217,17 @@ namespace Game.Behaviours.Player
         /// <summary>
         /// Accelerates/decelerates the vertical velocity depending on the character state.
         /// </summary>
-        /// <returns>New velocity, adjusted for frame length.</returns>
+        /// <returns>The new vertical velocity.</returns>
         private float CalcAndSetVerticalVelocity()
         {
-            verticalVelocity = CurrentState switch
+            if (stateMachine.IsInStateGroup(StateGroup.InAir))
             {
-                State.Rising => verticalVelocity + Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity) * Time.deltaTime,
-                State.Falling => verticalVelocity + Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity) * Time.deltaTime,
-                _ => 0,
-            };
+                verticalVelocity += Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity) * Time.deltaTime;
+            }
+            else
+            {
+                verticalVelocity = 0;
+            }
 
             return verticalVelocity;
         }
@@ -236,17 +235,23 @@ namespace Game.Behaviours.Player
         /// <summary>
         /// Accelerates/decelerates the horizontal velocity to the target velocity.
         /// </summary>
-        /// <returns>New velocity, adjusted for frame length.</returns>
+        /// <returns>The new horizontal velocity.</returns>
         private float CalcAndSetHorizontalVelocity()
         {
             bool isAccelerating = Mathf.Abs(targetHorizontalVelocity) >= Mathf.Abs(horizontalVelocity);
 
-            horizontalVelocity = CurrentState switch
+            if (stateMachine.IsInStateGroup(StateGroup.OnGround))
             {
-                State.OnGround => Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? accelerationSpeed : decelerationSpeed) * Time.deltaTime),
-                State.Rising or State.Falling => Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? inAirAccelerationSpeed : inAirDecelerationSpeed) * Time.deltaTime),
-                _ => 0,
-            };
+                horizontalVelocity = Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? accelerationSpeed : decelerationSpeed) * Time.deltaTime);
+            }
+            else if (stateMachine.IsInStateGroup(StateGroup.InAir))
+            {
+                horizontalVelocity = Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? inAirAccelerationSpeed : inAirDecelerationSpeed) * Time.deltaTime);
+            }
+            else
+            {
+                horizontalVelocity = 0;
+            }
 
             return horizontalVelocity;
         }
@@ -257,7 +262,7 @@ namespace Game.Behaviours.Player
         /// <returns>desired movement velocity of the character.</returns>
         private float CalcAndSetTargetHorizontalVelocity()
         {
-            targetHorizontalVelocity = UserInputManager.Instance.PlayerMovementVector * (IsInState(State.Rising) || IsInState(State.Falling) ? inAirMaxSpeed : maxSpeed);
+            targetHorizontalVelocity = UserInputManager.Instance.PlayerMovementVector * (stateMachine.IsInStateGroup(StateGroup.InAir) ? inAirMaxSpeed : maxSpeed);
             return targetHorizontalVelocity;
         }
 
@@ -273,9 +278,9 @@ namespace Game.Behaviours.Player
 
         private void OnJumpPressed(InputAction.CallbackContext cxt)
         {
-            if (IsInState(State.OnGround))
+            if (stateMachine.IsInStateGroup(StateGroup.OnGround))
             {
-                MoveState(Command.StartChargingJump);
+                stateMachine.TryMoveState(Command.StartChargingJump);
                 jumpChargeTimeStarted = Time.time;
                 OnStartChargingJumpChannel.RaiseEvent();
             }
@@ -283,9 +288,9 @@ namespace Game.Behaviours.Player
 
         private void OnJumpReleased(InputAction.CallbackContext cxt)
         {
-            if (IsInState(State.ChargingJump))
+            if (stateMachine.IsInStateGroup(StateGroup.ChargingJump))
             {
-                MoveState(Command.StartRising);
+                stateMachine.TryMoveState(Command.StartRising);
                 OnJumpChannel.RaiseEvent();
                 verticalVelocity = jumpSpeedByChargeTime.Evaluate(Time.time - jumpChargeTimeStarted);
             }
@@ -310,82 +315,5 @@ namespace Game.Behaviours.Player
         {
             currentGroundCollisions.Remove(collision.gameObject);
         }
-
-        #region State Machine
-
-#if UNITY_EDITOR
-        [Header("State Machine")]
-        [SerializeField] private bool debugMode;
-#endif
-
-        public State CurrentState { get; private set; }
-
-        private static readonly Dictionary<StateTransition, State> transitions = new Dictionary<StateTransition, State>()
-        {
-            // Pickup/Throw Behaviour
-            { new StateTransition(State.OnGround, Command.StartChargingJump), State.ChargingJump },
-            { new StateTransition(State.OnGround, Command.StartFalling), State.Falling },
-            { new StateTransition(State.ChargingJump, Command.StartRising), State.Rising },
-            { new StateTransition(State.Rising, Command.StartFalling), State.Falling },
-            { new StateTransition(State.Falling, Command.HitGround), State.OnGround },
-        };
-
-        private State GetState(Command command)
-        {
-            StateTransition transition = new StateTransition(CurrentState, command);
-
-            if (!transitions.TryGetValue(transition, out State nextState))
-            {
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
-            }
-
-            return nextState;
-        }
-
-        public State MoveState(Command command)
-        {
-            CurrentState = GetState(command);
-
-#if UNITY_EDITOR
-            if (debugMode)
-            {
-                Debug.Log($"New State: {CurrentState}");
-            }
-#endif
-
-            return CurrentState;
-        }
-
-        public bool IsInState(State state) => CurrentState.Equals(state);
-
-        public enum State
-        {
-            OnGround,
-            ChargingJump,
-            Rising,
-            Falling,
-        }
-
-        public enum Command
-        {
-            StartChargingJump,
-            StartRising,
-            StartFalling,
-            HitGround,
-        }
-
-        private struct StateTransition
-        {
-            public State currentState;
-            public Command transition;
-
-            public StateTransition(State currentState, Command transition)
-            {
-                this.currentState = currentState;
-                this.transition = transition;
-            }
-        }
-
-        #endregion
     }
 }
