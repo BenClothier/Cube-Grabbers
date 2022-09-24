@@ -15,6 +15,8 @@ namespace Game.Behaviours.Player
     {
         private PlayerStateMachine stateMachine;
 
+        private Coroutine miningRoutine;
+
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
@@ -68,9 +70,13 @@ namespace Game.Behaviours.Player
                     TryPickup(hit.collider);
                 }
             }
-            if (stateMachine.IsInStateGroup(StateGroup.Aiming))
+            else if (stateMachine.IsInStateGroup(StateGroup.Aiming))
             {
                 Throw();
+            }
+            else if (stateMachine.IsInState(State.Mining))
+            {
+                TryCancelMining();
             }
         }
 
@@ -99,16 +105,48 @@ namespace Game.Behaviours.Player
         {
             if (collider.CompareTag("Mineable") && Vector2.Distance(collider.transform.position, transform.position) <= maxMiningDistance)
             {
-                RequestMineCellServerRpc(WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position));
+                if (miningRoutine is null)
+                {
+                    miningRoutine = StartCoroutine(MiningRoutine(WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position)));
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError("Attempted to start a second mining routine. This should not happen.");
+                }
+            }
 
+            return false;
+        }
+
+        private bool TryCancelMining()
+        {
+            if (miningRoutine is null)
+            {
+                StopCoroutine(miningRoutine);
+                miningRoutine = null;
                 return true;
             }
 
             return false;
         }
 
+        private IEnumerator MiningRoutine(Vector2Int gridLoc)
+        {
+            if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
+            {
+                yield return new WaitForSeconds(secondsToMine.Value);
+                RequestMineCellServerRpc(gridLoc);
+                miningRoutine = null;
+            }
+            else
+            {
+                Debug.LogError("Failed to get seconds-to-mine for the given grid location");
+            }
+        }
+
         [ServerRpc]
-        public void RequestMineCellServerRpc(Vector2Int cellPosition)
+        private void RequestMineCellServerRpc(Vector2Int cellPosition)
         {
             WorldController.Instance.MineCell(cellPosition);
         }
