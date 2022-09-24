@@ -1,12 +1,9 @@
 namespace Game.DataAssets
 {
-    using Game.Behaviours;
-    using Game.Components;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
-    using UnityEngine.XR;
 
     [CreateAssetMenu(fileName = "Cell", menuName = "Game/Cell")]
     public class Block : ScriptableObject
@@ -21,6 +18,7 @@ namespace Game.DataAssets
 
         [SerializeField] private int id;
         [SerializeField] private Material material;
+        [Range(0, 60)][SerializeField] private float secondsToMine = 3;
         [Space]
         [SerializeField] private ItemDropChance[] itemDropChances;
         [Space]
