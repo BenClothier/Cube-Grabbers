@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Stone
   m_EditorClassIdentifier: 
   id: 0
-  material: {fileID: 2100000, guid: 1325ef12b8b6db2478d3fd9a402de862, type: 2}
+  secondsToMine: 2
   itemDropChances:
   - ItemID: 0
     dropChance: 1
@@ -23,6 +23,7 @@ MonoBehaviour:
     dropChance: 0.1
   - ItemID: 2
     dropChance: 0.01
+  material: {fileID: 2100000, guid: 1325ef12b8b6db2478d3fd9a402de862, type: 2}
   meshConfigurations:
   - N: 1
     NE: 2
