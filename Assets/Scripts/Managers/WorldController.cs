@@ -19,6 +19,18 @@ namespace Game.Managers
             worldGrid.Initialise();
         }
 
+        public bool TryGetTimeToMine(Vector2Int cellPos, out float? secondsToMine)
+        {
+            if (worldGrid.TryGetCell(cellPos, out int? blockID) && BlockDatabase.Instance.TryGetBlockByID(blockID.Value, out Block block))
+            {
+                secondsToMine = block.SecondsToMine;
+                return true;
+            }
+
+            secondsToMine = null;
+            return false;
+        }
+
         public void MineCell(Vector2Int gridLoc)
         {
             if (IsServer)
