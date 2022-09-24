@@ -57,6 +57,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMiningDistance: 5
+  miningOffsetToWall: 0.5
   onStartMiningEvent: {fileID: 11400000, guid: bcee3dacb117f71448a5c3c46691166c, type: 2}
   onStopMiningEvent: {fileID: 11400000, guid: 5b8f39b8d9a205a4db5707fa2b0bd2a9, type: 2}
   maxPickupDistance: 5

@@ -93,6 +93,7 @@ namespace Game.Behaviours.Player
 
         [Header("Mining")]
         [SerializeField] private float maxMiningDistance;
+        [SerializeField] private float miningOffsetToWall;
 
         [SerializeField] private EventChannel_Vector2 onStartMiningEvent;
         [SerializeField] private EventChannel_Void onStopMiningEvent;
@@ -118,7 +119,7 @@ namespace Game.Behaviours.Player
                         {
                             Vector2 dirToCell = ((Vector2)collider.transform.parent.position - nearestEmptyNeighbourPos.Value).normalized;
                             stateMachine.TryMoveState(Command.StartMining);
-                            onStartMiningEvent.InvokeEvent(nearestEmptyNeighbourPos.Value + dirToCell / 2);
+                            onStartMiningEvent.InvokeEvent(nearestEmptyNeighbourPos.Value + dirToCell * miningOffsetToWall);
                             miningRoutine = StartCoroutine(MiningRoutine(gridLoc, secondsToMine.Value));
                             return true;
                         }
