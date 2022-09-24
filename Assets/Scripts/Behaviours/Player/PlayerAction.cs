@@ -142,24 +142,27 @@ namespace Game.Behaviours.Player
             return false;
         }
 
+        private IEnumerator MiningRoutine(Vector2Int gridLoc, float secondsToMine)
+        {
+            yield return new WaitForSeconds(secondsToMine);
+            RequestMineCellServerRpc(gridLoc);
+            FinishMining();
+        }
+
         private bool TryCancelMining()
         {
             if (miningRoutine != null)
             {
                 StopCoroutine(miningRoutine);
-                miningRoutine = null;
+                FinishMining();
                 return true;
             }
 
             return false;
         }
 
-        private IEnumerator MiningRoutine(Vector2Int gridLoc, float secondsToMine)
+        private void FinishMining()
         {
-            Debug.Log("Started Mining");
-            yield return new WaitForSeconds(secondsToMine);
-
-            RequestMineCellServerRpc(gridLoc);
             miningRoutine = null;
             stateMachine.TryMoveState(Command.StartFalling);
             onStopMiningEvent.InvokeEvent();
