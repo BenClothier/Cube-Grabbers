@@ -21,8 +21,8 @@ namespace Game.Behaviours.VisualEffects
         {
             if ((vCam = GetComponentInChildren<CinemachineVirtualCamera>()) is not null && (vCamNoise = vCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>()) is not null && amplitudeOverTime is not null && frequencyOverTime is not null)
             {
-                startChannel.OnEventRaised += StartShake;
-                stopChannel.OnEventRaised += StopShake;
+                startChannel.OnEventInvocation += StartShake;
+                stopChannel.OnEventInvocation += StopShake;
             }
             else
             {

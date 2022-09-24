@@ -10,6 +10,7 @@ namespace Game.Behaviours.Player
     using UnityEngine.InputSystem;
     using System.Collections;
     using static PlayerStateMachine;
+    using System;
 
     public class PlayerAction : NetworkBehaviour
     {
@@ -93,6 +94,9 @@ namespace Game.Behaviours.Player
         [Header("Mining")]
         [SerializeField] private float maxMiningDistance;
 
+        [SerializeField] private EventChannel_Vector2 onStartMiningEvent;
+        [SerializeField] private EventChannel_Void onStopMiningEvent;
+
         private void InitialiseMiningBehaviour()
         {
         }
@@ -107,8 +111,18 @@ namespace Game.Behaviours.Player
             {
                 if (miningRoutine is null)
                 {
-                    miningRoutine = StartCoroutine(MiningRoutine(WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position)));
-                    return true;
+                    Vector2Int gridLoc = WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position);
+                    if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
+                    {
+                        stateMachine.TryMoveState(Command.StartMining);
+                        onStartMiningEvent.InvokeEvent(collider.transform.parent.position);
+                        miningRoutine = StartCoroutine(MiningRoutine(gridLoc, secondsToMine.Value));
+                        return true;
+                    }
+                    else
+                    {
+                        Debug.LogError("Failed to get seconds-to-mine for the given grid location");
+                    }
                 }
                 else
                 {
@@ -121,7 +135,7 @@ namespace Game.Behaviours.Player
 
         private bool TryCancelMining()
         {
-            if (miningRoutine is null)
+            if (miningRoutine != null)
             {
                 StopCoroutine(miningRoutine);
                 miningRoutine = null;
@@ -131,18 +145,15 @@ namespace Game.Behaviours.Player
             return false;
         }
 
-        private IEnumerator MiningRoutine(Vector2Int gridLoc)
+        private IEnumerator MiningRoutine(Vector2Int gridLoc, float secondsToMine)
         {
-            if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
-            {
-                yield return new WaitForSeconds(secondsToMine.Value);
-                RequestMineCellServerRpc(gridLoc);
-                miningRoutine = null;
-            }
-            else
-            {
-                Debug.LogError("Failed to get seconds-to-mine for the given grid location");
-            }
+            Debug.Log("Started Mining");
+            yield return new WaitForSeconds(secondsToMine);
+
+            RequestMineCellServerRpc(gridLoc);
+            miningRoutine = null;
+            stateMachine.TryMoveState(Command.StartFalling);
+            onStopMiningEvent.InvokeEvent();
         }
 
         [ServerRpc]

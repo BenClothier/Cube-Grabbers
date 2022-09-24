@@ -56,6 +56,11 @@ namespace Game.Behaviours.Player
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
 
+        [Header("Mining Lerp Targeting")]
+        [SerializeField] private AnimationCurve miningLerpSpeedByDistance;
+        [SerializeField] private EventChannel_Vector2 onStartMiningEvent;
+        [SerializeField] private EventChannel_Void onStopMiningEvent;
+
         private PlayerStateMachine stateMachine;
         private CinemachineVirtualCamera mainVirtualCam;
 
@@ -67,6 +72,8 @@ namespace Game.Behaviours.Player
         private float jumpChargeTimeStarted;
 
         private List<GameObject> currentGroundCollisions = new List<GameObject>();
+
+        private Vector2? lerpTarget;
 
         private bool IsOnGround => CountGroundColliders() > 0;
 
@@ -85,6 +92,8 @@ namespace Game.Behaviours.Player
                 stateMachine = GetComponent<PlayerStateMachine>();
                 UserInputManager.Instance.OnJumpPressed += OnJumpPressed;
                 UserInputManager.Instance.OnJumpReleased += OnJumpReleased;
+                onStartMiningEvent.OnEventInvocation += SetLerpTarget;
+                onStopMiningEvent.OnEventInvocation += ClearLerpTarget;
             }
         }
 
@@ -101,6 +110,8 @@ namespace Game.Behaviours.Player
             {
                 UserInputManager.Instance.OnJumpPressed -= OnJumpPressed;
                 UserInputManager.Instance.OnJumpReleased -= OnJumpReleased;
+                onStartMiningEvent.OnEventInvocation -= SetLerpTarget;
+                onStopMiningEvent.OnEventInvocation -= ClearLerpTarget;
             }
         }
 
@@ -140,6 +151,9 @@ namespace Game.Behaviours.Player
                 {
                     stateMachine.TryMoveState(Command.StartFalling);
                 }
+
+                CalcAndSetTargetLookRotation();
+                CalcAndSetPhysicsMovement();
             }
             else if (stateMachine.IsInStateGroup(StateGroup.Rising))
             {
@@ -147,6 +161,9 @@ namespace Game.Behaviours.Player
                 {
                     stateMachine.TryMoveState(Command.StartFalling);
                 }
+
+                CalcAndSetTargetLookRotation();
+                CalcAndSetPhysicsMovement();
             }
             else if (stateMachine.IsInStateGroup(StateGroup.Falling))
             {
@@ -154,14 +171,45 @@ namespace Game.Behaviours.Player
                 {
                     stateMachine.TryMoveState(Command.HitGround);
                 }
-            }
 
-            CalcAndSetTargetLookRotation();
-            CalcAndSetTargetHorizontalVelocity();
-            CalcAndSetVerticalVelocity();
+                CalcAndSetTargetLookRotation();
+                CalcAndSetPhysicsMovement();
+            }
+            else if (stateMachine.IsInState(PlayerStateMachine.State.Mining))
+            {
+                CalcAndSetLerpMovement(miningLerpSpeedByDistance);
+            }
 
             // Tell the server what velocity we want and what the current rotation of the character is
             UpdatePositionRotationServerRpc(targetHorizontalVelocity, verticalVelocity, model.transform.rotation);
+        }
+
+        private void CalcAndSetPhysicsMovement()
+        {
+            CalcAndSetTargetHorizontalVelocity();
+            CalcAndSetVerticalVelocity();
+        }
+
+        private void CalcAndSetLerpMovement(AnimationCurve lerpSpeedByDistanceCurve, Action onReachTargetCallback = null)
+        {
+            targetHorizontalVelocity = 0;
+            verticalVelocity = 0;
+
+            if (lerpTarget.HasValue)
+            {
+                float dist = Vector2.Distance(transform.position, lerpTarget.Value);
+                float thisFrameProgress = Time.deltaTime / (dist / lerpSpeedByDistanceCurve.Evaluate(dist));
+                transform.position = Vector2.Lerp(transform.position, lerpTarget.Value, thisFrameProgress);
+
+                if (onReachTargetCallback is not null && thisFrameProgress >= 1)
+                {
+                    onReachTargetCallback?.Invoke();
+                }
+            }
+            else
+            {
+                Debug.LogError("Could not do lerp movement as no lerp target is set.");
+            }
         }
 
         /// <summary>
@@ -282,7 +330,7 @@ namespace Game.Behaviours.Player
             {
                 stateMachine.TryMoveState(Command.StartChargingJump);
                 jumpChargeTimeStarted = Time.time;
-                OnStartChargingJumpChannel.RaiseEvent();
+                OnStartChargingJumpChannel.InvokeEvent();
             }
         }
 
@@ -291,7 +339,7 @@ namespace Game.Behaviours.Player
             if (stateMachine.IsInStateGroup(StateGroup.ChargingJump))
             {
                 stateMachine.TryMoveState(Command.StartRising);
-                OnJumpChannel.RaiseEvent();
+                OnJumpChannel.InvokeEvent();
                 verticalVelocity = jumpSpeedByChargeTime.Evaluate(Time.time - jumpChargeTimeStarted);
             }
         }
@@ -300,6 +348,16 @@ namespace Game.Behaviours.Player
         {
             currentGroundCollisions = currentGroundCollisions.Where(go => go is not null && !go.IsDestroyed()).ToList();
             return currentGroundCollisions.Count();
+        }
+
+        private void SetLerpTarget(Vector2 vec2)
+        {
+            lerpTarget = vec2;
+        }
+
+        private void ClearLerpTarget()
+        {
+            lerpTarget = null;
         }
 
         private void OnCollisionEnter(Collision collision)
