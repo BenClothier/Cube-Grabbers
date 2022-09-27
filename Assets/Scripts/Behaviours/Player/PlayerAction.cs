@@ -113,24 +113,28 @@ namespace Game.Behaviours.Player
                 Vector2Int gridLoc = WorldController.Instance.WorldGrid.GetGridLocFromWorldPos(collider.transform.parent.position);
                 if (WorldController.Instance.WorldGrid.TryGetNearestEmptyNeighbour(transform.position, gridLoc, out Vector2? nearestEmptyNeighbourPos, neighbourSet: Components.WorldGrid.NeighbourSet.Normal))
                 {
-                    if (miningRoutine is null)
+                    Vector2 dir = nearestEmptyNeighbourPos.Value - (Vector2)transform.position;
+                    if (!Physics.Raycast(transform.position, dir, dir.magnitude))
                     {
-                        if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
+                        if (miningRoutine is null)
                         {
-                            Vector2 dirToCell = ((Vector2)collider.transform.parent.position - nearestEmptyNeighbourPos.Value).normalized;
-                            stateMachine.TryMoveState(Command.StartMining);
-                            onStartMiningEvent.InvokeEvent(nearestEmptyNeighbourPos.Value + dirToCell * miningOffsetToWall);
-                            miningRoutine = StartCoroutine(MiningRoutine(gridLoc, secondsToMine.Value));
-                            return true;
+                            if (WorldController.Instance.TryGetTimeToMine(gridLoc, out float? secondsToMine))
+                            {
+                                Vector2 dirToCell = ((Vector2)collider.transform.parent.position - nearestEmptyNeighbourPos.Value).normalized;
+                                stateMachine.TryMoveState(Command.StartMining);
+                                onStartMiningEvent.InvokeEvent(nearestEmptyNeighbourPos.Value + dirToCell * miningOffsetToWall);
+                                miningRoutine = StartCoroutine(MiningRoutine(gridLoc, secondsToMine.Value));
+                                return true;
+                            }
+                            else
+                            {
+                                Debug.LogError("Failed to get seconds-to-mine for the given grid location");
+                            }
                         }
                         else
                         {
-                            Debug.LogError("Failed to get seconds-to-mine for the given grid location");
+                            Debug.LogError("Attempted to start a second mining routine. This should not happen.");
                         }
-                    }
-                    else
-                    {
-                        Debug.LogError("Attempted to start a second mining routine. This should not happen.");
                     }
                 }
                 else
