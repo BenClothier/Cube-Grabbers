@@ -56,11 +56,6 @@ namespace Game.Behaviours.Player
         [Header("LookRotation")]
         [SerializeField] private float lookSpeed;
 
-        [Header("Mining Lerp Targeting")]
-        [SerializeField] private AnimationCurve miningLerpSpeedByDistance;
-        [SerializeField] private EventChannel_Vector2 onStartMiningEvent;
-        [SerializeField] private EventChannel_Void onStopMiningEvent;
-
         private PlayerStateMachine stateMachine;
         private CinemachineVirtualCamera mainVirtualCam;
 
@@ -71,11 +66,15 @@ namespace Game.Behaviours.Player
 
         private float jumpChargeTimeStarted;
 
-        private List<GameObject> currentGroundCollisions = new List<GameObject>();
+        private List<GameObject> currentHorizontalColliders = new List<GameObject>();
+        private List<GameObject> currentVerticalColliders = new List<GameObject>();
 
-        private Vector2? lerpTarget;
+        private bool canGrabHorizontal = true;
+        private bool canGrabVertical = true;
 
-        private bool IsOnGround => CountGroundColliders() > 0;
+        private bool IsOnHorizontalSurface => CountHorizontalColliders() > 0;
+
+        private bool IsOnVerticalSurface => CountVerticalColliders() > 0;
 
         public override void OnNetworkSpawn()
         {
@@ -92,8 +91,6 @@ namespace Game.Behaviours.Player
                 stateMachine = GetComponent<PlayerStateMachine>();
                 UserInputManager.Instance.OnJumpPressed += OnJumpPressed;
                 UserInputManager.Instance.OnJumpReleased += OnJumpReleased;
-                onStartMiningEvent.OnEventInvocation += SetLerpTarget;
-                onStopMiningEvent.OnEventInvocation += ClearLerpTarget;
             }
         }
 
@@ -110,8 +107,6 @@ namespace Game.Behaviours.Player
             {
                 UserInputManager.Instance.OnJumpPressed -= OnJumpPressed;
                 UserInputManager.Instance.OnJumpReleased -= OnJumpReleased;
-                onStartMiningEvent.OnEventInvocation -= SetLerpTarget;
-                onStopMiningEvent.OnEventInvocation -= ClearLerpTarget;
             }
         }
 
@@ -145,76 +140,50 @@ namespace Game.Behaviours.Player
         /// </summary>
         private void ClientInput()
         {
-            if (stateMachine.IsInStateGroup(StateGroup.OnGround))
+            UpdateCanGrabSurfaceState();
+
+            if (stateMachine.IsInStateGroup(StateGroup.OnSurface))
             {
-                if (!IsOnGround)
+                if (!IsOnHorizontalSurface && !IsOnVerticalSurface)
                 {
-                    stateMachine.TryMoveState(Command.StartFalling);
+                    stateMachine.TryMoveState(Command.EnterAir);
                 }
 
                 CalcAndSetTargetLookRotation();
                 CalcAndSetPhysicsMovement();
             }
-            else if (stateMachine.IsInStateGroup(StateGroup.Rising))
+            else if (stateMachine.IsInStateGroup(StateGroup.InAir))
             {
-                if (verticalVelocity <= 0)
+                if ((canGrabHorizontal && IsOnHorizontalSurface) || (canGrabVertical && IsOnVerticalSurface))
                 {
-                    stateMachine.TryMoveState(Command.StartFalling);
+                    stateMachine.TryMoveState(Command.GrabSurface);
                 }
 
                 CalcAndSetTargetLookRotation();
                 CalcAndSetPhysicsMovement();
-            }
-            else if (stateMachine.IsInStateGroup(StateGroup.Falling))
-            {
-                if (IsOnGround)
-                {
-                    stateMachine.TryMoveState(Command.HitGround);
-                }
-
-                CalcAndSetTargetLookRotation();
-                CalcAndSetPhysicsMovement();
-            }
-            else if (stateMachine.IsInState(PlayerStateMachine.State.Mining))
-            {
-                CalcAndSetLerpMovement(miningLerpSpeedByDistance);
             }
 
             // Tell the server what velocity we want and what the current rotation of the character is
             UpdatePositionRotationServerRpc(targetHorizontalVelocity, verticalVelocity, model.transform.rotation);
         }
 
+        private void UpdateCanGrabSurfaceState()
+        {
+            if (!canGrabVertical && !IsOnVerticalSurface)
+            {
+                canGrabVertical = true;
+            }
+
+            if (!canGrabHorizontal && !IsOnHorizontalSurface)
+            {
+                canGrabHorizontal = true;
+            }
+        }
+
         private void CalcAndSetPhysicsMovement()
         {
             CalcAndSetTargetHorizontalVelocity();
             CalcAndSetVerticalVelocity();
-        }
-
-        private void CalcAndSetLerpMovement(AnimationCurve lerpSpeedByDistanceCurve, Action onReachTargetCallback = null)
-        {
-            targetHorizontalVelocity = 0;
-            verticalVelocity = 0;
-
-            if (lerpTarget.HasValue)
-            {
-                float dist = Vector2.Distance(transform.position, lerpTarget.Value);
-                float speed = lerpSpeedByDistanceCurve.Evaluate(dist);
-
-                if (speed > 0)
-                {
-                    float thisFrameProgress = Time.deltaTime / (dist / speed);
-                    transform.position = Vector2.Lerp(transform.position, lerpTarget.Value, thisFrameProgress);
-
-                    if (onReachTargetCallback is not null && thisFrameProgress >= 1)
-                    {
-                        onReachTargetCallback?.Invoke();
-                    }
-                }
-            }
-            else
-            {
-                Debug.LogError("Could not do lerp movement as no lerp target is set.");
-            }
         }
 
         /// <summary>
@@ -293,7 +262,7 @@ namespace Game.Behaviours.Player
         {
             bool isAccelerating = Mathf.Abs(targetHorizontalVelocity) >= Mathf.Abs(horizontalVelocity);
 
-            if (stateMachine.IsInStateGroup(StateGroup.OnGround))
+            if (IsOnHorizontalSurface && stateMachine.IsInStateGroup(StateGroup.OnSurface))
             {
                 horizontalVelocity = Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? accelerationSpeed : decelerationSpeed) * Time.deltaTime);
             }
@@ -331,7 +300,7 @@ namespace Game.Behaviours.Player
 
         private void OnJumpPressed(InputAction.CallbackContext cxt)
         {
-            if (stateMachine.IsInStateGroup(StateGroup.OnGround))
+            if (stateMachine.IsInStateGroup(StateGroup.OnSurface))
             {
                 stateMachine.TryMoveState(Command.StartChargingJump);
                 jumpChargeTimeStarted = Time.time;
@@ -343,40 +312,46 @@ namespace Game.Behaviours.Player
         {
             if (stateMachine.IsInStateGroup(StateGroup.ChargingJump))
             {
-                stateMachine.TryMoveState(Command.StartRising);
-                OnJumpChannel.InvokeEvent();
+                canGrabHorizontal = false;
+                canGrabVertical = false;
                 verticalVelocity = jumpSpeedByChargeTime.Evaluate(Time.time - jumpChargeTimeStarted);
+                stateMachine.TryMoveState(Command.EnterAir);
+                OnJumpChannel.InvokeEvent();
             }
         }
 
-        private int CountGroundColliders()
+        private int CountVerticalColliders()
         {
-            currentGroundCollisions = currentGroundCollisions.Where(go => go is not null && !go.IsDestroyed()).ToList();
-            return currentGroundCollisions.Count();
+            currentVerticalColliders = currentVerticalColliders.Where(go => go is not null && !go.IsDestroyed()).ToList();
+            return currentVerticalColliders.Count();
         }
 
-        private void SetLerpTarget(Vector2 vec2)
+        private int CountHorizontalColliders()
         {
-            lerpTarget = vec2;
-        }
-
-        private void ClearLerpTarget()
-        {
-            lerpTarget = null;
+            currentHorizontalColliders = currentHorizontalColliders.Where(go => go is not null && !go.IsDestroyed()).ToList();
+            return currentHorizontalColliders.Count();
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.contacts.Any(contact => contact.normal == Vector3.up))
+            if (collision.transform.CompareTag("Mineable"))
             {
-                currentGroundCollisions.Add(collision.gameObject);
+                if (collision.contacts.Any(contact => contact.normal == Vector3.up || contact.normal == Vector3.down))
+                {
+                    currentHorizontalColliders.Add(collision.gameObject);
+                }
+                else if (collision.contacts.Any(contact => contact.normal == Vector3.left || contact.normal == Vector3.right))
+                {
+                    currentVerticalColliders.Add(collision.gameObject);
+                }
             }
         }
 
 
         private void OnCollisionExit(Collision collision)
         {
-            currentGroundCollisions.Remove(collision.gameObject);
+            currentHorizontalColliders.Remove(collision.gameObject);
+            currentVerticalColliders.Remove(collision.gameObject);
         }
     }
 }
