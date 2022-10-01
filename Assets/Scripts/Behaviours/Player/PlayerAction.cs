@@ -75,7 +75,7 @@ namespace Game.Behaviours.Player
             {
                 Throw();
             }
-            else if (stateMachine.IsInState(State.Mining))
+            else if (stateMachine.IsInState(State.OnSurfaceMining))
             {
                 TryCancelMining();
             }
@@ -168,7 +168,7 @@ namespace Game.Behaviours.Player
         private void FinishMining()
         {
             miningRoutine = null;
-            stateMachine.TryMoveState(Command.StartFalling);
+            stateMachine.TryMoveState(Command.StopMining);
             onStopMiningEvent.InvokeEvent();
         }
 

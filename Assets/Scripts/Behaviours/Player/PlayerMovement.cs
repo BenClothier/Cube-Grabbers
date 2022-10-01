@@ -69,6 +69,9 @@ namespace Game.Behaviours.Player
         private List<GameObject> currentHorizontalColliders = new List<GameObject>();
         private List<GameObject> currentVerticalColliders = new List<GameObject>();
 
+        private bool canGrabHorizontal = true;
+        private bool canGrabVertical = true;
+
         private bool IsOnHorizontalSurface => CountHorizontalColliders() > 0;
 
         private bool IsOnVerticalSurface => CountVerticalColliders() > 0;
@@ -137,6 +140,8 @@ namespace Game.Behaviours.Player
         /// </summary>
         private void ClientInput()
         {
+            UpdateCanGrabSurfaceState();
+
             if (stateMachine.IsInStateGroup(StateGroup.OnSurface))
             {
                 if (!IsOnHorizontalSurface && !IsOnVerticalSurface)
@@ -149,7 +154,7 @@ namespace Game.Behaviours.Player
             }
             else if (stateMachine.IsInStateGroup(StateGroup.InAir))
             {
-                if (IsOnHorizontalSurface || IsOnVerticalSurface)
+                if ((canGrabHorizontal && IsOnHorizontalSurface) || (canGrabVertical && IsOnVerticalSurface))
                 {
                     stateMachine.TryMoveState(Command.GrabSurface);
                 }
@@ -160,6 +165,19 @@ namespace Game.Behaviours.Player
 
             // Tell the server what velocity we want and what the current rotation of the character is
             UpdatePositionRotationServerRpc(targetHorizontalVelocity, verticalVelocity, model.transform.rotation);
+        }
+
+        private void UpdateCanGrabSurfaceState()
+        {
+            if (!canGrabVertical && !IsOnVerticalSurface)
+            {
+                canGrabVertical = true;
+            }
+
+            if (!canGrabHorizontal && !IsOnHorizontalSurface)
+            {
+                canGrabHorizontal = true;
+            }
         }
 
         private void CalcAndSetPhysicsMovement()
@@ -244,7 +262,7 @@ namespace Game.Behaviours.Player
         {
             bool isAccelerating = Mathf.Abs(targetHorizontalVelocity) >= Mathf.Abs(horizontalVelocity);
 
-            if (stateMachine.IsInStateGroup(StateGroup.OnSurface))
+            if (IsOnHorizontalSurface && stateMachine.IsInStateGroup(StateGroup.OnSurface))
             {
                 horizontalVelocity = Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? accelerationSpeed : decelerationSpeed) * Time.deltaTime);
             }
@@ -294,6 +312,8 @@ namespace Game.Behaviours.Player
         {
             if (stateMachine.IsInStateGroup(StateGroup.ChargingJump))
             {
+                canGrabHorizontal = false;
+                canGrabVertical = false;
                 verticalVelocity = jumpSpeedByChargeTime.Evaluate(Time.time - jumpChargeTimeStarted);
                 stateMachine.TryMoveState(Command.EnterAir);
                 OnJumpChannel.InvokeEvent();

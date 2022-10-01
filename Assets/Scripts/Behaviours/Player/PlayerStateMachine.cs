@@ -23,6 +23,7 @@ public class PlayerStateMachine : MonoBehaviour
 
         { new StateTransition(State.OnSurfaceMining, Command.EnterAir), State.InAir },
         { new StateTransition(State.OnSurfaceMining, Command.StartChargingJump), State.ChargingJump },
+        { new StateTransition(State.OnSurfaceMining, Command.StopMining), State.OnSurface },
 
 
         { new StateTransition(State.ChargingJump, Command.EnterAir), State.InAir },
