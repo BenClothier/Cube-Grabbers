@@ -7,8 +7,8 @@ public class CreatureStateMachine : MonoBehaviour
 {
     public enum State
     {
-        OnSurface,
         InAir,
+        OnSurface,
     }
 
     public enum Command

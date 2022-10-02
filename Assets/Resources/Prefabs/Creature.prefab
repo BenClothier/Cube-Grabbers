@@ -72,13 +72,36 @@ MonoBehaviour:
   inAirMaxSpeed: 10
   inAirAccelerationSpeed: 10
   inAirDecelerationSpeed: 8
-  flyUpSpeed: 8
+  flySpeedByVelocity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -10
+      value: 100
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 3
+      value: 8
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.024396807
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   gravityMultiplierByVerticalVelocity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: -3
-      value: 3
+      value: 2.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -87,7 +110,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0
-      value: 2.5
+      value: 2
       inSlope: -0.3708864
       outSlope: -0.3708864
       tangentMode: 0

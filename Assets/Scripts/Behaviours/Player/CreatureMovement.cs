@@ -6,8 +6,6 @@ namespace Game.Behaviours.Player
     using Unity.Netcode;
     using Cinemachine;
     using System.Collections.Generic;
-    using System;
-    using UnityEngine.InputSystem;
     using System.Linq;
     using Unity.VisualScripting;
     using static CreatureStateMachine;
@@ -43,7 +41,7 @@ namespace Game.Behaviours.Player
         [SerializeField] private float inAirAccelerationSpeed;
         [SerializeField] private float inAirDecelerationSpeed;
 
-        [SerializeField] private float flyUpSpeed;
+        [SerializeField] private AnimationCurve flySpeedByVelocity;
         [SerializeField] private AnimationCurve gravityMultiplierByVerticalVelocity;
 
         [Header("LookRotation")]
@@ -134,7 +132,7 @@ namespace Game.Behaviours.Player
                 {
                     canGrabSurface = true;
                 }
-                if (IsOnHorizontalSurface || IsOnVerticalSurface)
+                if (canGrabSurface && (IsOnHorizontalSurface || IsOnVerticalSurface))
                 {
                     stateMachine.TryMoveState(Command.GrabSurface);
                     canGrabSurface = false;
@@ -153,7 +151,7 @@ namespace Game.Behaviours.Player
         /// </summary>
         private void UpdatePosition()
         {
-            Vector3 movement = CalcAndSetVelocity();
+            Vector3 movement = CalcAndSetVelocity() * Time.deltaTime;
 
             if (IsServer)
             {
@@ -209,7 +207,7 @@ namespace Game.Behaviours.Player
             if (stateMachine.IsInState(CreatureStateMachine.State.InAir))
             {
                 horizontalVelocity = Mathf.Lerp(horizontalVelocity, targetHorizontalVelocity, (isAccelerating ? inAirAccelerationSpeed : inAirDecelerationSpeed) * Time.deltaTime);
-                verticalVelocity += (UserInputManager.Instance.IsJumpPressed ? flyUpSpeed : (Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity))) * Time.deltaTime;
+                verticalVelocity += (UserInputManager.Instance.IsJumpPressed ? flySpeedByVelocity.Evaluate(verticalVelocity) : (Physics.gravity.y * gravityMultiplierByVerticalVelocity.Evaluate(verticalVelocity))) * Time.deltaTime;
             }
             else if (stateMachine.IsInState(CreatureStateMachine.State.OnSurface))
             {
@@ -235,7 +233,6 @@ namespace Game.Behaviours.Player
             {
                 targetHorizontalVelocity = 0;
             }
-
 
             return targetHorizontalVelocity;
         }
