@@ -14,6 +14,8 @@ namespace Game.Managers
 
         public Vector2 MousePos { get; private set; }
 
+        public bool IsJumpPressed { get; private set; }
+
         public event Action<InputAction.CallbackContext> OnPrimaryMouseDown
         {
             add
@@ -113,6 +115,7 @@ namespace Game.Managers
         {
             PlayerMovementVector = controls.Default.Move.ReadValue<float>();
             MousePos = controls.Default.MousePos.ReadValue<Vector2>();
+            IsJumpPressed = controls.Default.Jump.IsPressed();
         }
     }
 }

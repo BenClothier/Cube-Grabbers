@@ -5,6 +5,50 @@ using UnityEngine;
 
 public class PlayerStateMachine : MonoBehaviour
 {
+    public enum State
+    {
+        OnSurface,
+        OnSurfaceHolding,
+        OnSurfaceAiming,
+        OnSurfaceMining,
+
+        ChargingJump,
+        ChargingJumpHolding,
+        ChargingJumpAiming,
+
+        InAir,
+        InAirHolding,
+        InAirAiming,
+    }
+
+    public enum Command
+    {
+        EnterAir,
+        GrabSurface,
+        StartChargingJump,
+
+        Pickup,
+        StartAiming,
+        CancelAim,
+        Throw,
+
+        StartMining,
+        StopMining,
+    }
+
+    public enum StateGroup
+    {
+        CanPickup,
+        Holding,
+        Aiming,
+
+        OnSurface,
+        InAir,
+        ChargingJump,
+
+        CanMine,
+    }
+
     private static readonly Dictionary<StateTransition, State> transitions = new ()
     {
         { new StateTransition(State.OnSurface, Command.EnterAir), State.InAir },
@@ -106,50 +150,6 @@ public class PlayerStateMachine : MonoBehaviour
     public bool TryMoveState(Command command, bool erroneousIfCantDoTransition = true)
     {
         return TryMoveState(command, out _, erroneousIfCantDoTransition);
-    }
-
-    public enum State
-    {
-        OnSurface,
-        OnSurfaceHolding,
-        OnSurfaceAiming,
-        OnSurfaceMining,
-
-        ChargingJump,
-        ChargingJumpHolding,
-        ChargingJumpAiming,
-
-        InAir,
-        InAirHolding,
-        InAirAiming,
-    }
-
-    public enum Command
-    {
-        EnterAir,
-        GrabSurface,
-        StartChargingJump,
-
-        Pickup,
-        StartAiming,
-        CancelAim,
-        Throw,
-
-        StartMining,
-        StopMining,
-    }
-
-    public enum StateGroup
-    {
-        CanPickup,
-        Holding,
-        Aiming,
-
-        OnSurface,
-        InAir,
-        ChargingJump,
-
-        CanMine,
     }
 
     private struct StateTransition
